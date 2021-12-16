@@ -149,6 +149,12 @@ static int mtd_parse_partition(const char **_mtdparts,
 		mtdparts += 2;
 	}
 
+	/* if slc is found use emulated SLC mode on this partition*/
+	if (!strncmp(mtdparts, "slc", 3)) {
+		partition->add_flags |= MTD_SLC_ON_MLC_EMULATION;
+		mtdparts += 3;
+	}
+
 	/* Check for a potential next partition definition */
 	if (*mtdparts == ',') {
 		if (partition->size == MTD_SIZE_REMAINING) {
@@ -580,6 +586,7 @@ static struct mtd_info *allocate_partition(struct mtd_info *master,
 	/* set up the MTD object for this partition */
 	slave->type = master->type;
 	slave->flags = master->flags & ~part->mask_flags;
+	slave->flags |= part->add_flags;
 	slave->size = part->size;
 	slave->writesize = master->writesize;
 	slave->writebufsize = master->writebufsize;

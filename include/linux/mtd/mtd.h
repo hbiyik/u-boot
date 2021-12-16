@@ -134,6 +134,82 @@ struct mtd_ooblayout_ops {
 		     struct mtd_oob_region *oobfree);
 };
 
+/**
+ * struct mtd_pairing_info - page pairing information
+ *
+ * @pair: pair id
+ * @group: group id
+ *
+ * The term "pair" is used here, even though TLC NANDs might group pages by 3
+ * (3 bits in a single cell). A pair should regroup all pages that are sharing
+ * the same cell. Pairs are then indexed in ascending order.
+ *
+ * @group is defining the position of a page in a given pair. It can also be
+ * seen as the bit position in the cell: page attached to bit 0 belongs to
+ * group 0, page attached to bit 1 belongs to group 1, etc.
+ *
+ * Example:
+ * The H27UCG8T2BTR-BC datasheet describes the following pairing scheme:
+ *
+ *		group-0		group-1
+ *
+ *  pair-0	page-0		page-4
+ *  pair-1	page-1		page-5
+ *  pair-2	page-2		page-8
+ *  ...
+ *  pair-127	page-251	page-255
+ *
+ *
+ * Note that the "group" and "pair" terms were extracted from Samsung and
+ * Hynix datasheets, and might be referenced under other names in other
+ * datasheets (Micron is describing this concept as "shared pages").
+ */
+struct mtd_pairing_info {
+	int pair;
+	int group;
+};
+
+/**
+ * struct mtd_pairing_scheme - page pairing scheme description
+ *
+ * @ngroups: number of groups. Should be related to the number of bits
+ *	     per cell.
+ * @get_info: converts a write-unit (page number within an erase block) into
+ *	      mtd_pairing information (pair + group). This function should
+ *	      fill the info parameter based on the wunit index or return
+ *	      -EINVAL if the wunit parameter is invalid.
+ * @get_wunit: converts pairing information into a write-unit (page) number.
+ *	       This function should return the wunit index pointed by the
+ *	       pairing information described in the info argument. It should
+ *	       return -EINVAL, if there's no wunit corresponding to the
+ *	       passed pairing information.
+ *
+ * See mtd_pairing_info documentation for a detailed explanation of the
+ * pair and group concepts.
+ *
+ * The mtd_pairing_scheme structure provides a generic solution to represent
+ * NAND page pairing scheme. Instead of exposing two big tables to do the
+ * write-unit <-> (pair + group) conversions, we ask the MTD drivers to
+ * implement the ->get_info() and ->get_wunit() functions.
+ *
+ * MTD users will then be able to query these information by using the
+ * mtd_pairing_info_to_wunit() and mtd_wunit_to_pairing_info() helpers.
+ *
+ * @ngroups is here to help MTD users iterating over all the pages in a
+ * given pair. This value can be retrieved by MTD users using the
+ * mtd_pairing_groups() helper.
+ *
+ * Examples are given in the mtd_pairing_info_to_wunit() and
+ * mtd_wunit_to_pairing_info() documentation.
+ */
+struct mtd_pairing_scheme {
+	int ngroups;
+	int (*get_info)(struct mtd_info *mtd, int wunit,
+			struct mtd_pairing_info *info);
+	int (*get_wunit)(struct mtd_info *mtd,
+			 const struct mtd_pairing_info *info);
+};
+
 /*
  * Internal ECC layout control structure. For historical reasons, there is a
  * similar, smaller struct nand_ecclayout_user (in mtd-abi.h) that is retained
@@ -148,6 +224,43 @@ struct nand_ecclayout {
 };
 
 struct module;	/* only needed for owner field in mtd_info */
+
+/**
+ * struct mtd_part - MTD partition specific fields
+ *
+ * @node: list node used to add an MTD partition to the parent partition list
+ * @offset: offset of the partition relatively to the parent offset
+ * @size: partition size. Should be equal to mtd->size unless
+ *	  MTD_SLC_ON_MLC_EMULATION is set
+ * @flags: original flags (before the mtdpart logic decided to tweak them based
+ *	   on flash constraints, like eraseblock/pagesize alignment)
+ *
+ * This struct is embedded in mtd_info and contains partition-specific
+ * properties/fields.
+ */
+struct mtd_part {
+	struct list_head node;
+	u64 offset;
+	u64 size;
+	u32 flags;
+};
+
+/**
+ * struct mtd_master - MTD master specific fields
+ *
+ * @partitions_lock: lock protecting accesses to the partition list. Protects
+ *		     not only the master partition list, but also all
+ *		     sub-partitions.
+ * @suspended: et to 1 when the device is suspended, 0 otherwise
+ *
+ * This struct is embedded in mtd_info and contains master-specific
+ * properties/fields. The master is the root MTD device from the MTD partition
+ * point of view.
+ */
+struct mtd_master {
+	struct mutex partitions_lock;
+	unsigned int suspended : 1;
+};
 
 struct mtd_info {
 	u_char type;
@@ -211,6 +324,9 @@ struct mtd_info {
 
 	/* OOB layout description */
 	const struct mtd_ooblayout_ops *ooblayout;
+
+	/* NAND pairing scheme, only provided for MLC/TLC NANDs */
+	const struct mtd_pairing_scheme *pairing;
 
 	/* ECC layout structure pointer - read only! */
 	struct nand_ecclayout *ecclayout;
@@ -331,7 +447,30 @@ struct mtd_info {
 	 * MTD device can itself be a partition).
 	 */
 	struct list_head partitions;
+
+	union {
+		struct mtd_part part;
+		struct mtd_master master;
+	};
 };
+
+static inline struct mtd_info *mtd_get_master(struct mtd_info *mtd)
+{
+	while (mtd->parent)
+		mtd = mtd->parent;
+
+	return mtd;
+}
+
+static inline u64 mtd_get_master_ofs(struct mtd_info *mtd, u64 ofs)
+{
+	while (mtd->parent) {
+		ofs += mtd->offset;
+		mtd = mtd->parent;
+	}
+
+	return ofs;
+}
 
 #if IS_ENABLED(CONFIG_DM)
 static inline void mtd_set_ofnode(struct mtd_info *mtd, ofnode node)
@@ -393,11 +532,22 @@ static inline void mtd_set_ooblayout(struct mtd_info *mtd,
 	mtd->ooblayout = ooblayout;
 }
 
+static inline void mtd_set_pairing_scheme(struct mtd_info *mtd,
+				const struct mtd_pairing_scheme *pairing)
+{
+	mtd->pairing = pairing;
+}
+
 static inline u32 mtd_oobavail(struct mtd_info *mtd, struct mtd_oob_ops *ops)
 {
 	return ops->mode == MTD_OPS_AUTO_OOB ? mtd->oobavail : mtd->oobsize;
 }
 
+int mtd_wunit_to_pairing_info(struct mtd_info *mtd, int wunit,
+			      struct mtd_pairing_info *info);
+int mtd_pairing_info_to_wunit(struct mtd_info *mtd,
+			      const struct mtd_pairing_info *info);
+int mtd_pairing_groups(struct mtd_info *mtd);
 int mtd_erase(struct mtd_info *mtd, struct erase_info *instr);
 #ifndef __UBOOT__
 int mtd_point(struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen,
@@ -460,8 +610,10 @@ int mtd_writev(struct mtd_info *mtd, const struct kvec *vecs,
 
 static inline void mtd_sync(struct mtd_info *mtd)
 {
-	if (mtd->_sync)
-		mtd->_sync(mtd);
+	struct mtd_info *master = mtd_get_master(mtd);
+
+	if (master->_sync)
+		master->_sync(master);
 }
 
 int mtd_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
@@ -474,13 +626,15 @@ int mtd_block_markbad(struct mtd_info *mtd, loff_t ofs);
 #ifndef __UBOOT__
 static inline int mtd_suspend(struct mtd_info *mtd)
 {
-	return mtd->_suspend ? mtd->_suspend(mtd) : 0;
+	struct mtd_info *master = mtd_get_master(mtd);
+	return master->_suspend ? master->_suspend(master) : 0;
 }
 
 static inline void mtd_resume(struct mtd_info *mtd)
 {
-	if (mtd->_resume)
-		mtd->_resume(mtd);
+	struct mtd_info *master = mtd_get_master(mtd);
+	if (master->_resume)
+		master->_resume(master);
 }
 #endif
 
@@ -514,9 +668,29 @@ static inline uint32_t mtd_mod_by_ws(uint64_t sz, struct mtd_info *mtd)
 	return do_div(sz, mtd->writesize);
 }
 
+static inline int mtd_wunit_per_eb(struct mtd_info *mtd)
+{
+	struct mtd_info *master = mtd_get_master(mtd);
+
+	return master->erasesize / mtd->writesize;
+}
+
+static inline int mtd_offset_to_wunit(struct mtd_info *mtd, loff_t offs)
+{
+	return mtd_div_by_ws(mtd_mod_by_eb(offs, mtd), mtd);
+}
+
+static inline loff_t mtd_wunit_to_offset(struct mtd_info *mtd, loff_t base,
+					 int wunit)
+{
+	return base + (wunit * mtd->writesize);
+}
+
 static inline int mtd_has_oob(const struct mtd_info *mtd)
 {
-	return mtd->_read_oob && mtd->_write_oob;
+	struct mtd_info *master = mtd_get_master((struct mtd_info *)mtd);
+
+	return master->_read_oob && master->_write_oob;
 }
 
 static inline int mtd_type_is_nand(const struct mtd_info *mtd)
@@ -526,7 +700,9 @@ static inline int mtd_type_is_nand(const struct mtd_info *mtd)
 
 static inline int mtd_can_have_bb(const struct mtd_info *mtd)
 {
-	return !!mtd->_block_isbad;
+	struct mtd_info *master = mtd_get_master((struct mtd_info *)mtd);
+
+	return !!master->_block_isbad;
 }
 
 	/* Kernel-side ioctl definitions */

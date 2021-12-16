@@ -110,6 +110,10 @@ DECLARE_GLOBAL_DATA_PTR;
  * field for read-only partitions */
 #define MTD_WRITEABLE_CMD		1
 
+/* this flag needs to be set in part_info struct mask_flags
+ * field for slc-emulation partitions */
+#define MTD_SLC_ON_MLC_EMULATION_CMD	1
+
 /* default values for mtdids and mtdparts variables */
 #ifdef CONFIG_MTDIDS_DEFAULT
 #define MTDIDS_DEFAULT CONFIG_MTDIDS_DEFAULT
@@ -657,6 +661,11 @@ static int part_parse(const char *const partdef, const char **ret, struct part_i
 		p += 2;
 	}
 
+	if (strncmp(p, "slc", 3) == 0) {
+		mask_flags |= MTD_SLC_ON_MLC_EMULATION_CMD;
+		p += 3;
+	}
+
 	/* check for next partition definition */
 	if (*p == ',') {
 		if (size == SIZE_REMAINING) {
@@ -1163,6 +1172,17 @@ static int generate_mtdparts(char *buf, u32 buflen)
 				*(p++) = 'r';
 				*(p++) = 'o';
 				maxlen -= 2;
+			}
+
+			/* slc mask flag */
+			if (part->mask_flags && MTD_SLC_ON_MLC_EMULATION_CMD) {
+				len = 3;
+				if (len > maxlen)
+					goto cleanup;
+				*(p++) = 's';
+				*(p++) = 'l';
+				*(p++) = 'c';
+				maxlen -= 3;
 			}
 
 			/* print ',' separator if there are other partitions
