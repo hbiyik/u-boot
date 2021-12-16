@@ -4448,6 +4448,14 @@ ident_done:
 		mtd_set_pairing_scheme(mtd, &dist3_pairing_scheme);
 	}
 
+	/* Enable slc-mode on H27UCG8T2ETR to enable upstream Linux */
+	if (id_data[0] == NAND_MFR_HYNIX && id_data[1] == 0xde
+	    && id_data[2] == 0x14 && id_data[3] == 0xa7
+	    && id_data[4] == 0x42 && id_data[5] == 0x4a) {
+		chip->options |= NAND_NEED_SCRAMBLING;
+		mtd_set_pairing_scheme(mtd, &dist3_pairing_scheme);
+	}
+
 	if (chip->options & NAND_BUSWIDTH_AUTO) {
 		WARN_ON(chip->options & NAND_BUSWIDTH_16);
 		chip->options |= busw;
