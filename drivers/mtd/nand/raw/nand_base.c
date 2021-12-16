@@ -4439,6 +4439,15 @@ int nand_detect(struct nand_chip *chip, int *maf_id,
 
 ident_done:
 
+	/* Enable slc-mode on TC58TEG5DCLTA00 to match upstream Linux */
+	if (id_data[0] == NAND_MFR_TOSHIBA && id_data[1] == 0xd7
+	    && id_data[2] == 0x84 && id_data[3] == 0x93
+	    && id_data[4] == 0x72 && id_data[5] == 0x51
+	    && id_data[6] == 0x08 && id_data[7] == 0x04) {
+		chip->options |= NAND_NEED_SCRAMBLING;
+		mtd_set_pairing_scheme(mtd, &dist3_pairing_scheme);
+	}
+
 	if (chip->options & NAND_BUSWIDTH_AUTO) {
 		WARN_ON(chip->options & NAND_BUSWIDTH_16);
 		chip->options |= busw;
