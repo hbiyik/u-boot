@@ -10,6 +10,7 @@
 #include <image.h>
 #include <init.h>
 #include <log.h>
+#include <mapmem.h>
 #include <ram.h>
 #include <spl.h>
 #include <asm/arch-rockchip/bootrom.h>
@@ -149,6 +150,22 @@ void board_init_f(ulong dummy)
 	}
 	gd->ram_top = gd->ram_base + get_effective_memsize();
 	gd->ram_top = board_get_usable_ram_top(gd->ram_size);
+#endif
+#if defined(CONFIG_TPL) || defined(CONFIG_SPL_RAM)
+	/* Copy FDT blob from BSS to the end of DRAM */
+	if (gd->fdt_blob) {
+		gd->fdt_size = ALIGN(fdt_totalsize(gd->fdt_blob), 32);
+		unsigned long fdt_addr = ALIGN_DOWN(gd->ram_top - gd->fdt_size, 16);
+
+		gd->new_fdt = map_sysmem(fdt_addr, gd->fdt_size);
+
+		debug("Reserved %lu bytes for FDT at: %08lx\n", gd->fdt_size, fdt_addr);
+
+		if (gd->new_fdt) {
+			memcpy(gd->new_fdt, gd->fdt_blob, fdt_totalsize(gd->fdt_blob));
+			gd->fdt_blob = gd->new_fdt;
+		}
+	}
 #endif
 	preloader_console_init();
 }
