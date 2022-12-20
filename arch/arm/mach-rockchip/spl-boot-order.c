@@ -77,6 +77,9 @@ static int spl_node_to_boot_device(int node)
 	if (!uclass_get_device_by_of_offset(UCLASS_SPI_FLASH, node, &parent))
 		return BOOT_DEVICE_SPI;
 
+	if (!uclass_get_device_by_of_offset(UCLASS_USB, node, &parent))
+		return BOOT_DEVICE_USB;
+
 	return -1;
 }
 
