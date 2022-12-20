@@ -169,6 +169,16 @@ config USB_FUNCTION_MASS_STORAGE
 
 config USB_FUNCTION_ROCKUSB
         bool "Enable USB rockusb gadget"
+		depends on BLK
+        help
+          Rockusb protocol is widely used by Rockchip SoC based devices. It can
+          read/write info, image to/from devices. This enables the USB part of
+          the rockusb gadget.for more detail about Rockusb protocol, please see
+          doc/README.rockusb
+
+config SPL_USB_FUNCTION_ROCKUSB
+        bool "Enable USB rockusb gadget in SPL"
+		depends on SPL_BLK
         help
           Rockusb protocol is widely used by Rockchip SoC based devices. It can
           read/write info, image to/from devices. This enables the USB part of
