@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <asm/io.h>
 #include <linux/bitops.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <power/regulator.h>
 
@@ -81,6 +82,9 @@ int rockchip_saradc_start_channel(struct udevice *dev, int channel)
 		pr_err("Requested channel is invalid!");
 		return -EINVAL;
 	}
+
+	writel(0, &priv->regs->ctrl);
+	udelay(1);
 
 	/* 8 clock periods as delay between power up and start cmd */
 	writel(8, &priv->regs->dly_pu_soc);
