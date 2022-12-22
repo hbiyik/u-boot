@@ -445,12 +445,12 @@ static int adc_pre_probe(struct udevice *dev)
 	/* Set ADC VDD plat: polarity, uV, regulator (phandle). */
 	ret = adc_vdd_plat_set(dev);
 	if (ret)
-		pr_err("%s: Can't update Vdd. Error: %d", dev->name, ret);
+		pr_debug("%s: Can't update Vdd: %d", dev->name, ret);
 
 	/* Set ADC VSS plat: polarity, uV, regulator (phandle). */
 	ret = adc_vss_plat_set(dev);
 	if (ret)
-		pr_err("%s: Can't update Vss. Error: %d", dev->name, ret);
+		pr_debug("%s: Can't update Vss: %d", dev->name, ret);
 
 	return 0;
 }
