@@ -2,15 +2,16 @@
 
 #include "rk3066a-u-boot.dtsi"
 
-/ {
-	config {
-        /*dont not know why but with config block, uboot can not find mmc config, should be a bug somewhere?*/
-	};
-
+/{
 	chosen {
-		u-boot,spl-boot-order = "same-as-spl", &mmc0, &emmc, &usb_host;
+		u-boot,spl-boot-order = &mmc0, &emmc, &usb_host, &usb_otg;
+		stdout-path = "serial2:1500000n8";
 	};
+};
 
+&saradc {
+	vdd-microvolts = <2500000>;
+	u-boot,dm-spl;
 };
 
 &cru {
@@ -34,10 +35,17 @@
 	max-frequency = <4000000>;
 	u-boot,dm-spl;
 	u-boot,spl-fifo-mode;
+	status = "okay";
 };
 
-&mmc1 {
-	status = "disabled";
+&emmc {
+	fifo-mode;
+	max-frequency = <4000000>;
+	u-boot,dm-spl;
+	u-boot,spl-fifo-mode;
+	status = "okay";
+	cap-mmc-highspeed;
+	non-removable;
 };
 
 &noc {
@@ -51,4 +59,25 @@
 
 &uart2 {
 	u-boot,dm-pre-reloc;
+};
+
+
+&usb_host {
+	u-boot,dm-spl;
+};
+
+&usb_otg {
+	u-boot,dm-spl;
+};
+
+&usbphy {
+	u-boot,dm-spl;
+};
+
+&usbphy0 {
+	u-boot,dm-spl;
+};
+
+&usbphy1 {
+	u-boot,dm-spl;
 };

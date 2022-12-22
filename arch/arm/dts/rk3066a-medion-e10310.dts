@@ -19,6 +19,19 @@
 		device_type = "memory";
 		reg = <0x60000000 0x40000000>;
 	};
+	
+	adc-keys {
+		compatible = "adc-keys";
+		io-channels = <&saradc 1>;
+		io-channel-names = "buttons";
+		keyup-threshold-microvolt = <2500000>;
+		poll-interval = <100>;
+
+		recovery {
+			label = "recovery";
+			press-threshold-microvolt = <0>;
+		};
+	};
 
 	vdd_log: vdd-log {
 		compatible = "pwm-regulator";
@@ -192,6 +205,29 @@
 	pinctrl-0 = <&emmc_clk>, <&emmc_cmd>, <&emmc_rst>;
 	vmmc-supply = <&vcc_emmc>;
 	vqmmc-supply = <&vcc_emmc>;
+};
+
+&nfc {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	nand@0 {
+		reg = <0>;
+		label = "rk-nand";
+		nand-bus-width = <8>;
+		nand-ecc-mode = "hw";
+		nand-ecc-step-size = <1024>;
+		nand-ecc-strength = <40>;
+		nand-is-boot-medium;
+		rockchip,boot-blks = <8>;
+		rockchip,boot-ecc-strength = <24>;
+	};
+};
+
+&saradc {
+	vref-supply = <&vcc_25>;
+	status = "okay";
 };
 
 &pwm3 {
