@@ -11,7 +11,7 @@
 
 /* ((CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR - 64) * 512) */
 
-#ifndef CONFIG_SPL_BUILD
+#if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_ENV_SUPPORT)
 
 /* First try to boot from SD (index 1), then eMMC (index 0) */
 #if CONFIG_IS_ENABLED(CMD_MMC)
