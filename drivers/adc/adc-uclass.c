@@ -426,7 +426,7 @@ static int adc_vss_plat_set(struct udevice *dev)
 	/* Optionally get regulators */
 #if !IS_ENABLED(CONFIG_SPL_BUILD)
 	int ret = device_get_supply_regulator(dev, "vss-supply",
-
+										  &uc_pdata->vss_supply);
 	if (!ret)
 		return adc_vss_plat_update(dev);
 
