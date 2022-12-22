@@ -43,6 +43,7 @@ ifndef CONFIG_TPL_BUILD
 ifndef CONFIG_VPL_BUILD
 ifdef CONFIG_SPL_BUILD
 
+obj-$(CONFIG_SPL_ADC) += adc/
 obj-$(CONFIG_SPL_CPU) += cpu/
 obj-$(CONFIG_SPL_CRYPTO) += crypto/
 obj-$(CONFIG_SPL_MPC8XXX_INIT_DDR) += ddr/fsl/
@@ -76,7 +77,7 @@ endif
 
 ifeq ($(CONFIG_SPL_BUILD)$(CONFIG_TPL_BUILD),)
 
-obj-y += adc/
+obj-$(CONFIG_ADC) += adc/
 obj-y += ata/
 obj-$(CONFIG_DM_DEMO) += demo/
 obj-$(CONFIG_BIOSEMU) += bios_emulator/
