@@ -9,6 +9,7 @@
 #include <adc.h>
 #include <clk.h>
 #include <dm.h>
+#include <dt-structs.h>
 #include <errno.h>
 #include <asm/io.h>
 #include <linux/bitops.h>
@@ -39,6 +40,12 @@ struct rockchip_saradc_priv {
 	struct rockchip_saradc_regs		*regs;
 	int					active_channel;
 	const struct rockchip_saradc_data	*data;
+};
+
+struct rockchip_adc_plat {
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
+	struct dtd_rockchip_adc dtplat;
+#endif
 };
 
 int rockchip_saradc_channel_data(struct udevice *dev, int channel,
@@ -101,16 +108,30 @@ int rockchip_saradc_stop(struct udevice *dev)
 
 int rockchip_saradc_probe(struct udevice *dev)
 {
+#if CONFIG_IS_ENABLED(OF_PLATDATA) || !IS_ENABLED(CONFIG_SPL_BUILD)
 	struct adc_uclass_plat *uc_pdata = dev_get_uclass_plat(dev);
+#endif
 	struct rockchip_saradc_priv *priv = dev_get_priv(dev);
-	struct udevice *vref;
 	struct clk clk;
-	int vref_uv;
 	int ret;
 
-	ret = clk_get_by_index(dev, 0, &clk);
-	if (ret)
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
+	struct rockchip_adc_plat *plat = dev_get_plat(dev);
+	struct dtd_rockchip_adc *dtplat = &plat->dtplat;
+
+	priv->regs = (struct rockchip_saradc_regs *)dtplat->reg[0];
+
+	ret = clk_get_by_phandle(dev, &dtplat->clocks[0], &clk);
+	if (ret < 0)
 		return ret;
+	uc_pdata->vdd_microvolts = dtplat->vdd_microvolts;
+	uc_pdata->vss_microvolts = 0;
+#endif
+	if (CONFIG_IS_ENABLED(OF_REAL)) {
+		ret = clk_get_by_index(dev, 0, &clk);
+		if (ret)
+			return ret;
+	}
 
 	ret = clk_set_rate(&clk, priv->data->clk_rate);
 	if (IS_ERR_VALUE(ret))
@@ -118,13 +139,16 @@ int rockchip_saradc_probe(struct udevice *dev)
 
 	priv->active_channel = -1;
 
+#if !IS_ENABLED(CONFIG_SPL_BUILD)
+	struct udevice *vref;
+
 	ret = device_get_supply_regulator(dev, "vref-supply", &vref);
 	if (ret) {
 		printf("can't get vref-supply: %d\n", ret);
 		return ret;
 	}
 
-	vref_uv = regulator_get_value(vref);
+	int vref_uv = regulator_get_value(vref);
 	if (vref_uv < 0) {
 		printf("can't get vref-supply value: %d\n", vref_uv);
 		return vref_uv;
@@ -134,7 +158,7 @@ int rockchip_saradc_probe(struct udevice *dev)
 	uc_pdata->vdd_supply = vref;
 	uc_pdata->vdd_microvolts = vref_uv;
 	uc_pdata->vss_microvolts = 0;
-
+#endif
 	return 0;
 }
 
@@ -142,16 +166,18 @@ int rockchip_saradc_of_to_plat(struct udevice *dev)
 {
 	struct adc_uclass_plat *uc_pdata = dev_get_uclass_plat(dev);
 	struct rockchip_saradc_priv *priv = dev_get_priv(dev);
-	struct rockchip_saradc_data *data;
 
-	data = (struct rockchip_saradc_data *)dev_get_driver_data(dev);
-	priv->regs = (struct rockchip_saradc_regs *)dev_read_addr(dev);
-	if (priv->regs == (struct rockchip_saradc_regs *)FDT_ADDR_T_NONE) {
-		pr_err("Dev: %s - can't get address!", dev->name);
-		return -ENODATA;
+	if (CONFIG_IS_ENABLED(OF_REAL)) {
+		priv->regs = (struct rockchip_saradc_regs *)dev_read_addr(dev);
+		if (priv->regs == (struct rockchip_saradc_regs *)FDT_ADDR_T_NONE) {
+			pr_err("Dev: %s - can't get address!", dev->name);
+			return -ENODATA;
+		}
+	} else {
+		dev->driver_data = dev->driver->of_match->data;
 	}
 
-	priv->data = data;
+	priv->data = (struct rockchip_saradc_data *)dev_get_driver_data(dev);
 	uc_pdata->data_mask = (1 << priv->data->num_bits) - 1;
 	uc_pdata->data_format = ADC_DATA_FORMAT_BIN;
 	uc_pdata->data_timeout_us = SARADC_TIMEOUT / 5;
@@ -194,12 +220,16 @@ static const struct udevice_id rockchip_saradc_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(rockchip_saradc) = {
-	.name		= "rockchip_saradc",
+U_BOOT_DRIVER(rockchip_adc) = {
+	.name		= "rockchip_adc",
 	.id		= UCLASS_ADC,
 	.of_match	= rockchip_saradc_ids,
 	.ops		= &rockchip_saradc_ops,
 	.probe		= rockchip_saradc_probe,
 	.of_to_plat = rockchip_saradc_of_to_plat,
 	.priv_auto	= sizeof(struct rockchip_saradc_priv),
+	.plat_auto	= sizeof(struct rockchip_adc_plat),
 };
+DM_DRIVER_ALIAS(rockchip_adc, rockchip_saradc)
+DM_DRIVER_ALIAS(rockchip_adc, rockchip_rk3066_tsadc)
+DM_DRIVER_ALIAS(rockchip_adc, rockchip_rk3399_saradc)
