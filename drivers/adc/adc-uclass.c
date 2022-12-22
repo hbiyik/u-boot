@@ -146,6 +146,7 @@ int adc_channel_data(struct udevice *dev, int channel, unsigned int *data)
 	struct adc_uclass_plat *uc_pdata = dev_get_uclass_plat(dev);
 	const struct adc_ops *ops = dev_get_driver_ops(dev);
 	unsigned int timeout_us = uc_pdata->data_timeout_us;
+	unsigned long start_time;
 	int ret;
 
 	if (!ops->channel_data)
@@ -155,14 +156,14 @@ int adc_channel_data(struct udevice *dev, int channel, unsigned int *data)
 	if (ret)
 		return ret;
 
+	start_time = get_timer(0);
 	do {
 		ret = ops->channel_data(dev, channel, data);
 		if (!ret || ret != -EBUSY)
 			break;
 
-		/* TODO: use timer uclass (for early calls). */
 		sdelay(5);
-	} while (timeout_us--);
+	} while (get_timer(start_time) < timeout_us);
 
 	return ret;
 }
@@ -173,6 +174,7 @@ int adc_channels_data(struct udevice *dev, unsigned int channel_mask,
 	struct adc_uclass_plat *uc_pdata = dev_get_uclass_plat(dev);
 	unsigned int timeout_us = uc_pdata->multidata_timeout_us;
 	const struct adc_ops *ops = dev_get_driver_ops(dev);
+	unsigned long start_time;
 	int ret;
 
 	if (!ops->channels_data)
@@ -182,14 +184,14 @@ int adc_channels_data(struct udevice *dev, unsigned int channel_mask,
 	if (ret)
 		return ret;
 
+	start_time = get_timer(0);
 	do {
 		ret = ops->channels_data(dev, channel_mask, channels);
 		if (!ret || ret != -EBUSY)
 			break;
 
-		/* TODO: use timer uclass (for early calls). */
 		sdelay(5);
-	} while (timeout_us--);
+	} while (get_timer(start_time) < timeout_us);
 
 	return ret;
 }
