@@ -199,7 +199,11 @@ int adc_channel_single_shot(const char *name, int channel, unsigned int *data)
 	struct udevice *dev;
 	int ret;
 
+#if IS_ENABLED(CONFIG_SPL_BUILD)
+	ret = uclass_get_device(UCLASS_ADC, 0, &dev);
+#else
 	ret = uclass_get_device_by_name(UCLASS_ADC, name, &dev);
+#endif
 	if (ret)
 		return ret;
 
@@ -248,7 +252,11 @@ int adc_channels_single_shot(const char *name, unsigned int channel_mask,
 	struct udevice *dev;
 	int ret;
 
+#if IS_ENABLED(CONFIG_SPL_BUILD)
+	ret = uclass_get_device(UCLASS_ADC, 0, &dev);
+#else
 	ret = uclass_get_device_by_name(UCLASS_ADC, name, &dev);
+#endif
 	if (ret)
 		return ret;
 
@@ -372,20 +380,26 @@ int adc_raw_to_uV(struct udevice *dev, unsigned int raw, int *uV)
 static int adc_vdd_plat_set(struct udevice *dev)
 {
 	struct adc_uclass_plat *uc_pdata = dev_get_uclass_plat(dev);
-	int ret;
 	char *prop;
+
+	uc_pdata->vdd_microvolts = -ENODATA;
+
+	if (CONFIG_IS_ENABLED(OF_PLATDATA))
+		return 0;
 
 	prop = "vdd-polarity-negative";
 	uc_pdata->vdd_polarity_negative = dev_read_bool(dev, prop);
 
 	/* Optionally get regulators */
-	ret = device_get_supply_regulator(dev, "vdd-supply",
-					  &uc_pdata->vdd_supply);
+#if !IS_ENABLED(CONFIG_SPL_BUILD)
+	int ret = device_get_supply_regulator(dev, "vdd-supply",
+					      &uc_pdata->vdd_supply);
 	if (!ret)
 		return adc_vdd_plat_update(dev);
 
 	if (ret != -ENOENT)
 		return ret;
+#endif
 
 	/* No vdd-supply phandle. */
 	prop  = "vdd-microvolts";
@@ -397,20 +411,26 @@ static int adc_vdd_plat_set(struct udevice *dev)
 static int adc_vss_plat_set(struct udevice *dev)
 {
 	struct adc_uclass_plat *uc_pdata = dev_get_uclass_plat(dev);
-	int ret;
 	char *prop;
+
+	uc_pdata->vss_microvolts = -ENODATA;
+
+	if (CONFIG_IS_ENABLED(OF_PLATDATA))
+		return 0;
 
 	prop = "vss-polarity-negative";
 	uc_pdata->vss_polarity_negative = dev_read_bool(dev, prop);
 
-	ret = device_get_supply_regulator(dev, "vss-supply",
-					  &uc_pdata->vss_supply);
+	/* Optionally get regulators */
+#if !IS_ENABLED(CONFIG_SPL_BUILD)
+	int ret = device_get_supply_regulator(dev, "vss-supply",
+
 	if (!ret)
 		return adc_vss_plat_update(dev);
 
 	if (ret != -ENOENT)
 		return ret;
-
+#endif
 	/* No vss-supply phandle. */
 	prop = "vss-microvolts";
 	uc_pdata->vss_microvolts = dev_read_u32_default(dev, prop, -ENODATA);
