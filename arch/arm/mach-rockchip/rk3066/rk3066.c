@@ -28,12 +28,15 @@ void board_debug_uart_init(void)
 
 void spl_board_init(void)
 {
+	__maybe_unused struct rk3066_grf * const grf = (void *)GRF_BASE;
+
 	if (!IS_ENABLED(CONFIG_SPL_BUILD))
 		return;
 
-	if (IS_ENABLED(CONFIG_SPL_DM_MMC)) {
-		struct rk3066_grf * const grf = (void *)GRF_BASE;
+	if (IS_ENABLED(CONFIG_NAND_BOOT))
+		rk_clrreg(&grf->soc_con0, EMMC_FLASH_SEL_MASK);
 
+	if (IS_ENABLED(CONFIG_SPL_DM_MMC)) {
 		rk_clrsetreg(&grf->gpio3b_iomux,
 			     GPIO3B0_MASK | GPIO3B1_MASK | GPIO3B2_MASK |
 			     GPIO3B3_MASK | GPIO3B4_MASK | GPIO3B5_MASK |
