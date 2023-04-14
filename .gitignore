@@ -18,6 +18,9 @@
 *.cfgtmp
 *.img
 *.dts.tmp
+*.project
+*.cproject
+*.settings
 
 # Build tree
 /build-*
