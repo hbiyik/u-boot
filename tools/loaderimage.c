@@ -1,6 +1,6 @@
 #include "compiler.h"
 #include <version.h>
-#include <sha.h>
+#include <u-boot/sha.h>
 
 #define MODE_PACK             0
 #define MODE_UNPACK           1

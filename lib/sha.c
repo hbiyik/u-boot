@@ -26,7 +26,7 @@
 */
 
 //#include "mincrypt/sha.h"
-#include <sha.h>
+#include <u-boot/sha.h>
 
 // Some machines lack byteswap.h and endian.h.  These have to use the
 // slower code, even if they're little-endian.
