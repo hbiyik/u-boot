@@ -6,6 +6,11 @@ config TARGET_MK808
 	  MK808 is a RK3066-based board with 1 USB host and 1 USB OTG port,
 	  HDMI and a micro-SD card slot. It also includes on-board NAND
 	  and 1GB of SDRAM.
+	  
+config TARGET_MEDION_E10310
+    bool "Medion E10310"
+    help
+      E10310 is a RK3066-based tablet from medion.
 
 config ROCKCHIP_BOOT_MODE_REG
 	default 0x20004040
@@ -43,5 +48,6 @@ config TPL_SERIAL
 	default y
 
 source "board/rikomagic/mk808/Kconfig"
+source "board/medion/e10310/Kconfig"
 
 endif

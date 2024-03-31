@@ -1,0 +1,15 @@
+if TARGET_MEDION_E10310
+
+config SYS_BOARD
+	default "e10310"
+
+config SYS_VENDOR
+	default "medion"
+
+config SYS_CONFIG_NAME
+	default "medion_e10310"
+
+config BOARD_SPECIFIC_OPTIONS # dummy
+	def_bool y
+
+endif

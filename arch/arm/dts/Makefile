@@ -92,7 +92,8 @@ dtb-$(CONFIG_ROCKCHIP_RK3036) += \
 	rk3036-sdk.dtb
 
 dtb-$(CONFIG_ROCKCHIP_RK3066) += \
-	rk3066a-mk808.dtb
+	rk3066a-mk808.dtb \
+	rk3066a-medion-e10310.dtb
 
 dtb-$(CONFIG_ROCKCHIP_RK3128) += \
 	rk3128-evb.dtb
