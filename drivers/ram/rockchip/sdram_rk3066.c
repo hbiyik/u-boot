@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <clk.h>
+#include <debug_uart.h>
 #include <dm.h>
 #include <dt-structs.h>
 #include <errno.h>
@@ -56,6 +57,76 @@ struct rk3066_dmc_sdram_params {
 	int num_channels;
 	struct regmap *map;
 };
+
+static void sdram_print_ddr_info_rk30xx(struct rk3066_dmc_sdram_params *params, int channels)
+{
+    u64 total_cap = 0;
+
+    printascii("DRAM INFO:\n");
+    for(int channel = 0; channel < channels; channel++)
+    {
+        if(params->ch[channel].rank == 0)
+            continue;
+        printascii("CH:");
+        printdec(channel + 1);
+        printascii(",BW:");
+        printdec(8 << params->ch[channel].bw);
+        printascii(",DIEBW:");
+        printdec(8 << params->ch[channel].dbw);
+        printascii(",BANK:");
+        printdec(0x1 << params->ch[channel].bk);
+        printascii(",RANKS:");
+        printdec(params->ch[channel].rank);
+        printascii(",COL:");
+        printdec(params->ch[channel].col);
+        printascii("\n");
+        for(int cs = 0; cs < params->ch[channel].rank; cs ++)
+        {
+            u8 row = cs == 0 ? params->ch[channel].cs0_row : params->ch[channel].cs1_row;
+            u64 cap;
+            printascii("RANK:");
+            printdec(cs + 1);
+            printascii(",ROW:");
+            printdec(row);
+            printascii(",SIZE:");
+            cap = 1llu << (params->ch[channel].bw + params->ch[channel].col + \
+                           params->ch[channel].bk + row);
+            if (params->ch[channel].row_3_4)
+                cap = cap * 3 / 4;
+            total_cap += cap;
+            printdec(cap >> 20);
+            printascii("MB\n");
+        }
+    }
+    switch (params->base.dramtype) {
+    case DDR3:
+        printascii("DDR3");
+        break;
+    case LPDDR2:
+        printascii("LPDDR2");
+        break;
+    case LPDDR3:
+        printascii("LPDDR3");
+        break;
+    default:
+        printascii("Unknown Device");
+        break;
+    }
+    printascii(" ");
+    printdec(params->base.ddr_freq / 1000000);
+    printascii("MHz ");
+    printdec(total_cap >> 20);
+    printascii("MB\n");
+    printascii("TCL:");
+    printdec(params->pctl_timing.tcl);
+    printascii(" TRCD:");
+    printdec(params->pctl_timing.trcd);
+    printascii(" TRP:");
+    printdec(params->pctl_timing.trp);
+    printascii(" TRAS:");
+    printdec(params->pctl_timing.tras);
+    printascii("\n");
+}
 
 const int rk3066_dmc_ddrconf_table[] = {
 	/*
@@ -771,6 +842,7 @@ static int rk3066_dmc_sdram_init(struct rk3066_dmc_dram_info *dram,
 		goto error;
 
 	rk3066_dmc_dram_all_config(dram, sdram_params);
+	sdram_print_ddr_info_rk30xx(sdram_params, 2);
 	debug("SDRAM init OK!\n");
 
 	return 0;
