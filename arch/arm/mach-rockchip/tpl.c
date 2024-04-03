@@ -50,6 +50,11 @@ __weak void rockchip_stimer_init(void)
 #endif
 }
 
+__weak int get_boot_lr(void)
+{
+    return 0;
+}
+
 void board_init_f(ulong dummy)
 {
 	struct udevice *dev;
@@ -65,6 +70,7 @@ void board_init_f(ulong dummy)
 	 * printascii("string");
 	 */
 	debug_uart_init();
+	printf("LR: 0x%x\n", get_boot_lr());
 #ifdef CONFIG_TPL_BANNER_PRINT
 	printascii("\nU-Boot TPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
 				U_BOOT_TIME ")\n");

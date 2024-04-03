@@ -16,6 +16,10 @@
 #endif
 
 #if CONFIG_IS_ENABLED(ROCKCHIP_EARLYRETURN_TO_BROM)
+SAVE_LR_ADDR:
+    .word 0x0
+    ldr r3, =SAVE_LR_ADDR
+    str lr, [r3]
 /*
  * Keep track of the re-entries with help of the lr register.
  * This binary can be re-used and called from various BROM functions.
@@ -59,6 +63,12 @@ save_boot_params:
 	ldr	r0, =SAVE_SP_ADDR
 	str	sp, [r0]
 	b	save_boot_params_ret
+
+    .globl get_boot_lr
+get_boot_lr:
+    ldr r0, =SAVE_LR_ADDR
+    ldr r0, [r0]
+    bx lr
 
 	.globl back_to_bootrom
 back_to_bootrom:
