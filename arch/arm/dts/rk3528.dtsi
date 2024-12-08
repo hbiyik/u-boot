@@ -2099,6 +2099,12 @@
 		#clock-cells = <0>;
 		clock-output-names = "clk_hdmiphy_pixel_io";
 		status = "disabled";
+
+		inno_hdmiphy_clk: clk-port {
+			#clock-cells = <0>;
+			clock-output-names = "clk_hdmiphy_pixel_io";
+			status = "okay";
+		};
 	};
 
 	acodec: acodec@ffe10000 {
