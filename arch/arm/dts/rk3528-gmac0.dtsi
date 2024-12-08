@@ -1,0 +1,18 @@
+/*
+ * (C) Copyright 2018 Rockchip Electronics Co., Ltd
+ *
+ * SPDX-License-Identifier:     GPL-2.0+
+ */
+ 
+&gmac0 {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&mdio0 {
+    u-boot,dm-pre-reloc;
+};
+
+&rmii0_phy {
+    u-boot,dm-pre-reloc;
+};
