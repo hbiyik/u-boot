@@ -1,0 +1,52 @@
+/*
+ * (C) Copyright 2018 Rockchip Electronics Co., Ltd
+ *
+ * SPDX-License-Identifier:     GPL-2.0+
+ */
+
+&usb2phy {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&u2phy_host {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&u2phy_otg {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&usb_host0_ehci {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&usb_host0_ohci {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&usbdrd30 {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&usbdrd_dwc3 {
+    u-boot,dm-pre-reloc;
+    dr_mode = "otg";
+    maximum-speed = "high-speed";
+    extcon = <&usb2phy>;
+    phys = <&u2phy_otg>;
+    phy-names = "usb2-phy";
+    snps,dis_u2_susphy_quirk;
+    snps,usb2-lpm-disable;
+    status = "okay";
+};
+
+&combphy_pu {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
