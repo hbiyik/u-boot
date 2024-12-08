@@ -17,6 +17,7 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/edp_rk3288.h>
+#include <asm/arch/hardware.h>
 #include <asm/arch/grf_rk3288.h>
 #include <dt-bindings/clock/rk3288-cru.h>
 
