@@ -1,0 +1,72 @@
+/*
+ * (C) Copyright 2024 boogie
+ *
+ * SPDX-License-Identifier:     GPL-2.0+
+ */
+
+
+&display_subsystem {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+
+    route {
+        u-boot,dm-pre-reloc;
+
+        route_hdmi: route-hdmi {
+            u-boot,dm-pre-reloc;
+            status = "okay";
+            logo,mode = "center";
+            charge_logo,mode = "center";
+            connect = <&vp0_out_hdmi>;
+        };
+    };
+};
+
+&vop {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&vop_mmu {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&vop_out {
+    u-boot,dm-pre-reloc;
+};
+
+&vop_out_port0 {
+    u-boot,dm-pre-reloc;
+};
+
+&vp0_out_hdmi {
+    u-boot,dm-pre-reloc;
+};
+
+&hdmi {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&hdmiphy {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
+
+&inno_hdmiphy_clk {
+    u-boot,dm-pre-reloc;
+};
+
+&hdmi_ports {
+    u-boot,dm-pre-reloc;
+};
+
+&hdmi_port0 {
+    u-boot,dm-pre-reloc;
+};
+
+&hdmi_in_vp0 {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
