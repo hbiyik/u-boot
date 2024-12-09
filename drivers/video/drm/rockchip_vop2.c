@@ -4726,7 +4726,7 @@ static int rockchip_vop2_init(struct display_state *state)
 	snprintf(dclk_name, sizeof(dclk_name), "dclk_vp%d", cstate->crtc_id);
 	ret = clk_get_by_name(cstate->dev, dclk_name, &cstate->dclk);
 	if (ret) {
-		printf("%s: Failed to get dclk ret=%d\n", __func__, ret);
+		printf("%s: Failed to get %s ret=%d\n", __func__, dclk_name, ret);
 		return ret;
 	}
 #endif
