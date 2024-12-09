@@ -1589,6 +1589,7 @@ int rockchip_show_logo(void)
 		s->logo.rotate = s->logo_rotate;
 		if (load_bmp_logo(&s->logo, s->ulogo_name)) {
 			printf("failed to display uboot logo\n");
+			display_init(s);
 		} else {
 			ret = display_logo(s);
 			if (ret == -EAGAIN)
