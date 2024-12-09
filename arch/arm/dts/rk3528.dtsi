@@ -1018,7 +1018,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			port@0 {
+			vop_out_port0: port@0 {
 				#address-cells = <1>;
 				#size-cells = <0>;
 				reg = <0>;
@@ -1232,11 +1232,11 @@
 		hpd-gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
 		status = "disabled";
 
-		ports {
+		hdmi_ports: ports {
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			port@0 {
+			hdmi_port0: port@0 {
 				reg = <0>;
 				#address-cells = <1>;
 				#size-cells = <0>;
