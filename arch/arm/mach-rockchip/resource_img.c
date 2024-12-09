@@ -15,6 +15,10 @@
 #include <asm/arch/uimage.h>
 #include <asm/arch/fit.h>
 
+#ifdef CONFIG_ROCKCHIP_RESOURCE_FAT
+#include <asm/arch/resource_fat.h>
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define PART_RESOURCE			"resource"
@@ -437,6 +441,12 @@ int rockchip_read_resource_file(void *buf, const char *name, int blk_offset, int
 
 	if (!desc)
 		return -ENODEV;
+
+#ifdef CONFIG_ROCKCHIP_RESOURCE_FAT
+    int ret = rockchip_read_fat_file(buf, name, &desc);
+    if(ret >= 0)
+        return ret;
+#endif
 
 	f = resource_get_file(name);
 	if (!f) {
