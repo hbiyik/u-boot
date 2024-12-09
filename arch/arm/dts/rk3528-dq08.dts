@@ -9,6 +9,7 @@
 #include "rk3528-u-boot.dtsi"
 #include "rk3528-usb.dtsi"
 #include "rk3528-gmac0.dtsi"
+#include "rk3528-hdmi.dtsi"
 #include <dt-bindings/input/input.h>
 
 / {
