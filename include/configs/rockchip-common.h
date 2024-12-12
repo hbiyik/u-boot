@@ -79,6 +79,12 @@
 	#define BOOT_TARGET_NVME(func)
 #endif
 
+#if CONFIG_IS_ENABLED(CMD_SCSI)
+	#define BOOT_TARGET_SCSI(func)  func(SCSI, scsi, 0)
+#else
+	#define BOOT_TARGET_SCSI(func)
+#endif
+
 #if CONFIG_IS_ENABLED(CMD_MTD_BLK)
 	#define BOOT_TARGET_MTD(func)	\
 		func(MTD, mtd, 2)	\
@@ -116,6 +122,7 @@
 	BOOT_TARGET_SD(func) \
     BOOT_TARGET_USB(func) \
 	BOOT_TARGET_NVME(func) \
+	BOOT_TARGET_SCSI(func) \
 	BOOT_TARGET_MMC(func) \
 	BOOT_TARGET_MTD(func) \
 	BOOT_TARGET_RKNAND(func) \
@@ -162,6 +169,8 @@
 		"setenv devtype nvme; setenv devnum 0; echo Boot from nvme0;" \
 	"elif nvme dev 1; then " \
 		"setenv devtype nvme; setenv devnum 1; echo Boot from nvme1;" \
+	"elif scsi dev 0; then " \
+		"setenv devtype scsi; setenv devnum 0; echo Boot from scsi0/sata0;" \
 	"elif mmc dev 0; then " \
 		"setenv devtype mmc; setenv devnum 0; echo Boot from MMC;" \
 	"elif mtd_blk dev 0; then " \
