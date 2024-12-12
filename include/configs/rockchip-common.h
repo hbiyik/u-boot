@@ -1,7 +1,7 @@
 /*
  * (C) Copyright 2016 Rockchip Electronics Co., Ltd
  *
- * SPDX-License-Identifier:     GPL-2.0+
+ * SPDX-License-Identifier:	 GPL-2.0+
  */
 
 #ifndef _ROCKCHIP_COMMON_H_
@@ -12,7 +12,7 @@
 #define CFG_CPUID_OFFSET		0x7
 #endif
 
-#define COUNTER_FREQUENCY               24000000
+#define COUNTER_FREQUENCY			   24000000
 
 #if CONFIG_IS_ENABLED(TINY_FRAMEWORK) && !defined(CONFIG_ARM64)
 #undef CONFIG_SYS_ARCH_TIMER
@@ -64,11 +64,11 @@
 
 /* First try to boot from SD (index 1), then eMMC (index 0) */
 #if CONFIG_IS_ENABLED(CMD_MMC)
-	#define BOOT_TARGET_MMC(func) \
-		func(MMC, mmc, 1) \
-		func(MMC, mmc, 0)
+	#define BOOT_TARGET_MMC(func) func(MMC, mmc, 0)
+	#define BOOT_TARGET_SD(func) func(MMC, mmc, 1)
 #else
 	#define BOOT_TARGET_MMC(func)
+	#define BOOT_TARGET_SD(func)
 #endif
 
 #if CONFIG_IS_ENABLED(CMD_MTD_BLK)
@@ -105,6 +105,7 @@
 #endif
 
 #define BOOT_TARGET_DEVICES(func) \
+	BOOT_TARGET_SD(func) \
     BOOT_TARGET_USB(func) \
 	BOOT_TARGET_MMC(func) \
 	BOOT_TARGET_MTD(func) \
@@ -149,7 +150,7 @@
 	"if mmc dev 1 && rkimgtest mmc 1; then " \
 		"setenv devtype mmc; setenv devnum 1; echo Boot from SDcard;" \
 	"elif mmc dev 0; then " \
-		"setenv devtype mmc; setenv devnum 0;" \
+		"setenv devtype mmc; setenv devnum 0; echo Boot from MMC;" \
 	"elif mtd_blk dev 0; then " \
 		"setenv devtype mtd; setenv devnum 0;" \
 	"elif mtd_blk dev 1; then " \
