@@ -174,17 +174,17 @@
 	"elif mmc dev 0; then " \
 		"setenv devtype mmc; setenv devnum 0; echo Boot from MMC;" \
 	"elif mtd_blk dev 0; then " \
-		"setenv devtype mtd; setenv devnum 0;" \
+		"setenv devtype mtd; setenv devnum 0; echo Boot from mtd0;" \
 	"elif mtd_blk dev 1; then " \
-		"setenv devtype mtd; setenv devnum 1;" \
+		"setenv devtype mtd; setenv devnum 1; echo Boot from mtd1;" \
 	"elif mtd_blk dev 2; then " \
-		"setenv devtype mtd; setenv devnum 2;" \
+		"setenv devtype mtd; setenv devnum 2; echo Boot from mtd2;" \
 	"elif rknand dev 0; then " \
-		"setenv devtype rknand; setenv devnum 0;" \
+		"setenv devtype rknand; setenv devnum 0; echo Boot from NAND;" \
 	"elif rksfc dev 0; then " \
-		"setenv devtype spinand; setenv devnum 0;" \
+		"setenv devtype spinand; setenv devnum 0; echo Boot from rksfc0;" \
 	"elif rksfc dev 1; then " \
-		"setenv devtype spinor; setenv devnum 1;" \
+		"setenv devtype spinor; setenv devnum 1; echo Boot from rksfc1;" \
 	"else;" \
 		"setenv devtype ramdisk; setenv devnum 0;" \
 	"fi; \0"
