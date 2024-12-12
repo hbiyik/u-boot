@@ -44,6 +44,12 @@
 #define BOOTENV_DEV_NAME_BLKDEV(devtypeu, devtypel, instance) \
 	#devtypel #instance " "
 
+#ifdef CONFIG_ANDROID_BOOTLOADER
+#define ANDROID_BOOT() "boot_android ${devtype} ${devnum};"
+#else
+#define ANDROID_BOOT()
+#endif
+
 #ifdef CONFIG_SANDBOX
 #define BOOTENV_SHARED_HOST	BOOTENV_SHARED_BLKDEV(host)
 #define BOOTENV_DEV_HOST	BOOTENV_DEV_BLKDEV
@@ -67,7 +73,6 @@
 #define BOOTENV_DEV_NAME_MMC \
 	BOOT_TARGET_DEVICES_references_MMC_without_CONFIG_CMD_MMC
 #endif
-
 #ifdef CONFIG_CMD_UBIFS
 #define BOOTENV_SHARED_UBIFS \
 	"ubifs_boot=" \
@@ -398,6 +403,7 @@
 		"part list ${devtype} ${devnum} -bootable devplist; "     \
 		"env exists devplist || setenv devplist 1; "              \
 		"for distro_bootpart in ${devplist}; do "                 \
+			ANDROID_BOOT() \
 			"if fstype ${devtype} "                           \
 					"${devnum}:${distro_bootpart} "   \
 					"bootfstype; then "               \

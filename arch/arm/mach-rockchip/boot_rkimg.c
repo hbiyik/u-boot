@@ -246,13 +246,12 @@ struct blk_desc *rockchip_get_bootdev(void)
 	int dev_type;
 	int devnum;
 
-	if (dev_desc)
-		return dev_desc;
+	//if (dev_desc)
+	//	return dev_desc;
 
 	boot_devtype_init();
 	dev_type = get_bootdev_type();
 	devnum = env_get_ulong("devnum", 10, 0);
-
 	dev_desc = blk_get_devnum_by_type(dev_type, devnum);
 	if (!dev_desc) {
 		printf("%s: Can't find dev_desc!\n", __func__);
@@ -268,12 +267,12 @@ struct blk_desc *rockchip_get_bootdev(void)
 			"DDR52", "HS200", "HS400", "HS400 Enhanced Strobe"};
 
 		mmc = find_mmc_device(devnum);
-		printf("MMC%d: %s, %dMhz\n", devnum,
+		debug("MMC%d: %s, %dMhz\n", devnum,
 		       timing[mmc->timing], mmc->clock / 1000000);
 	}
 #endif
 
-	printf("PartType: %s\n", part_get_type(dev_desc));
+	debug("PartType: %s\n", part_get_type(dev_desc));
 
 #ifdef CONFIG_MTD_BLK
 	mtd_blk_map_partitions(dev_desc);
