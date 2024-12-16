@@ -402,16 +402,23 @@ config ENV_AES
 	  complications and is not recommended for use.  Please see
 	  CVE-2017-3225 and CVE-2017-3226 for more details.
 
+config ENV_FAT_ROCKCHIP_RESOURCE
+    bool "Use rockchip resource FAT partition"
+    depends on ENV_IS_IN_FAT && ROCKCHIP_RESOURCE_FAT
+    help
+      Set this if you want to save the uboot environemtn in rockchip FAT
+      resource partiton 
+
 config ENV_FAT_INTERFACE
 	string "Name of the block device for the environment"
-	depends on ENV_IS_IN_FAT
+	depends on ENV_IS_IN_FAT && !ENV_FAT_ROCKCHIP_RESOURCE
 	default "mmc" if TI_COMMON_CMD_OPTIONS || ARCH_ZYNQMP || ARCH_AT91
 	help
 	  Define this to a string that is the name of the block device.
 
 config ENV_FAT_DEVICE_AND_PART
 	string "Device and partition for where to store the environemt in FAT"
-	depends on ENV_IS_IN_FAT
+	depends on ENV_IS_IN_FAT && !ENV_FAT_ROCKCHIP_RESOURCE
 	default "0:1" if TI_COMMON_CMD_OPTIONS
 	default "0:auto" if ARCH_ZYNQMP
 	default "0" if ARCH_AT91

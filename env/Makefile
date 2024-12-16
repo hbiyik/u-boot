@@ -19,7 +19,11 @@ extra-$(CONFIG_ENV_IS_IN_FLASH) += embedded.o
 obj-$(CONFIG_ENV_IS_IN_NVRAM) += embedded.o
 obj-$(CONFIG_ENV_IS_IN_FLASH) += flash.o
 obj-$(CONFIG_ENV_IS_IN_MMC) += mmc.o
+ifdef CONFIG_ENV_FAT_ROCKCHIP_RESOURCE
+obj-$(CONFIG_ENV_IS_IN_FAT) += fat_rockchip.o
+else
 obj-$(CONFIG_ENV_IS_IN_FAT) += fat.o
+endif
 obj-$(CONFIG_ENV_IS_IN_EXT4) += ext4.o
 obj-$(CONFIG_ENV_IS_IN_NAND) += nand.o
 obj-$(CONFIG_ENV_IS_IN_NVRAM) += nvram.o
@@ -53,7 +57,11 @@ else
 obj-$(CONFIG_ENV_IS_NOWHERE) += nowhere.o
 endif
 obj-$(CONFIG_ENV_IS_IN_MMC) += mmc.o
+ifdef CONFIG_ENV_FAT_ROCKCHIP_RESOURCE
+obj-$(CONFIG_ENV_IS_IN_FAT) += fat_rockchip.o
+else
 obj-$(CONFIG_ENV_IS_IN_FAT) += fat.o
+endif
 obj-$(CONFIG_ENV_IS_IN_EXT4) += ext4.o
 obj-$(CONFIG_ENV_IS_IN_NAND) += nand.o
 obj-$(CONFIG_ENV_IS_IN_SPI_FLASH) += sf.o
