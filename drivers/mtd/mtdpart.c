@@ -938,6 +938,8 @@ int add_mtd_partitions_of(struct mtd_info *master)
 			part.mask_flags |= MTD_WRITEABLE;
 		if (ofnode_read_bool(child, "lock"))
 			part.mask_flags |= MTD_POWERUP_LOCK;
+		if (ofnode_read_bool(child, "slc-mode"))
+			part.add_flags |= MTD_SLC_ON_MLC_EMULATION;
 
 		part.offset = offset;
 		part.size = size;
