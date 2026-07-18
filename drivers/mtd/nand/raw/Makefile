@@ -4,6 +4,7 @@
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 
 obj-$(CONFIG_NAND_CHIP_TOSHIBA) += nand_toshiba.o
+obj-$(CONFIG_NAND_CHIP_SAMSUNG) += nand_samsung.o
 
 ifdef CONFIG_XPL_BUILD
 
@@ -18,8 +19,7 @@ obj-$(CONFIG_SPL_NAND_SIMPLE) += nand_spl_simple.o
 obj-$(CONFIG_SPL_NAND_LOAD) += nand_spl_load.o
 obj-$(CONFIG_SPL_NAND_ECC) += nand_ecc.o
 obj-$(CONFIG_SPL_NAND_BASE) += nand_base.o nand_amd.o nand_hynix.o \
-				nand_macronix.o nand_micron.o \
-				nand_samsung.o
+				nand_macronix.o nand_micron.o
 obj-$(CONFIG_SPL_NAND_IDENT) += nand_ids.o nand_timings.o
 obj-$(CONFIG_$(PHASE_)NAND_INIT) += nand.o
 ifeq ($(CONFIG_SPL_ENV_SUPPORT),y)
@@ -38,7 +38,6 @@ obj-y += nand_amd.o
 obj-y += nand_hynix.o
 obj-y += nand_macronix.o
 obj-y += nand_micron.o
-obj-y += nand_samsung.o
 obj-y += nand_timings.o
 
 endif # not spl
