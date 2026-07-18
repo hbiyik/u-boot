@@ -3,7 +3,7 @@
 # (C) Copyright 2000-2007
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 
-mtd-$(CONFIG_MTD) += mtdcore.o mtd_uboot.o
+mtd-$(CONFIG_$(PHASE_)MTD) += mtdcore.o mtd_uboot.o
 mtd-$(CONFIG_DM_MTD) += mtd-uclass.o
 mtd-$(CONFIG_MTD_PARTITIONS) += mtdpart.o
 mtd-$(CONFIG_MTD_CONCAT) += mtdconcat.o
