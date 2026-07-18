@@ -51,7 +51,7 @@ int find_dev_and_part(const char *id, struct mtd_device **dev,
 
 #define MAX_NUM_PAGES 64
 
-static int nand_biterror(struct mtd_info *mtd, ulong off, int bit)
+static int nand_biterror(struct mtd_info *mtd, loff_t off, int bit)
 {
 	int ret = 0;
 	int page = 0;
@@ -126,7 +126,7 @@ static int nand_biterror(struct mtd_info *mtd, ulong off, int bit)
 	data ^= (1 << bit);
 	datbuf[block_off / mtd->writesize][block_off % mtd->writesize] = data;
 
-	printf("Flip data at 0x%lx with xor 0x%02x (bit=%d) to value=0x%02x\n",
+	printf("Flip data at 0x%llx with xor 0x%02x (bit=%d) to value=0x%02x\n",
 	       off, (1 << bit), bit, data);
 
 	/* Write back twisted data and unmodified OOB */
@@ -159,7 +159,7 @@ free_memory:
 	return ret;
 }
 
-static int nand_dump(struct mtd_info *mtd, ulong off, int only_oob,
+static int nand_dump(struct mtd_info *mtd, loff_t off, int only_oob,
 		     int ecc, int repeat)
 {
 	int i;
@@ -184,8 +184,7 @@ static int nand_dump(struct mtd_info *mtd, ulong off, int only_oob,
 		ret = 1;
 		goto free_dat;
 	}
-	off &= ~(mtd->writesize - 1);
-	loff_t addr = (loff_t) off;
+	off &= ~((loff_t)mtd->writesize - 1);
 	struct mtd_oob_ops ops;
 	memset(&ops, 0, sizeof(ops));
 	ops.datbuf = datbuf;
@@ -196,14 +195,14 @@ static int nand_dump(struct mtd_info *mtd, ulong off, int only_oob,
 		ops.mode = MTD_OPS_PLACE_OOB;
 	else
 		ops.mode = MTD_OPS_RAW;
-	i = mtd_read_oob(mtd, addr, &ops);
+	i = mtd_read_oob(mtd, off, &ops);
 	if (i < 0) {
-		printf("Error reading page at offset %08lx, %d %s\n",
+		printf("Error reading page at offset %08llx, %d %s\n",
 		       off, i, i == -EUCLEAN ? "correctable" :
 		       "uncorrectable, dumping raw data");
 		ret = 1;
 	}
-	printf("\nPage at offset %08lx dump:\n", off);
+	printf("\nPage at offset %08llx dump:\n", off);
 
 	if (!only_oob) {
 		i = mtd->writesize;
@@ -224,10 +223,12 @@ free_dat:
 }
 
 #ifdef CONFIG_CMD_NAND_WATCH
-static int nand_watch_bf(struct mtd_info *mtd, ulong off, ulong size, bool quiet)
+static int nand_watch_bf(struct mtd_info *mtd, loff_t off, ulong size, bool quiet)
 {
 	unsigned int max_bf = 0, pages_wbf = 0;
-	unsigned int first_page, pages, i;
+	unsigned int i;
+	u64 first_page = off;
+	u64 pages = size;
 	struct mtd_oob_ops ops = {};
 	u_char *buf;
 	int ret;
@@ -238,8 +239,8 @@ static int nand_watch_bf(struct mtd_info *mtd, ulong off, ulong size, bool quiet
 		return 1;
 	}
 
-	first_page = off / mtd->writesize;
-	pages = size / mtd->writesize;
+	do_div(first_page, mtd->writesize);
+	do_div(pages, mtd->writesize);
 
 	ops.datbuf = buf;
 	ops.len = mtd->writesize;
@@ -263,7 +264,7 @@ static int nand_watch_bf(struct mtd_info *mtd, ulong off, ulong size, bool quiet
 	}
 
 	printf("Maximum number of bitflips: %u\n", max_bf);
-	printf("Pages with bitflips: %u/%u\n", pages_wbf, pages);
+	printf("Pages with bitflips: %u/%llu\n", pages_wbf, pages);
 
 	free(buf);
 
@@ -711,7 +712,7 @@ static int do_nand(struct cmd_tbl *cmdtp, int flag, int argc,
 		ecc = !strcmp(&cmd[4], ".ecc") || !strcmp(&cmd[4], ".ecc.oob") ||
 			!strcmp(&cmd[4], ".oob.ecc");
 
-		off = (int)hextoul(argv[2], NULL);
+		off = simple_strtoull(argv[2], NULL, 16);
 		ret = nand_dump(mtd, off, only_oob, ecc, repeat);
 
 		return ret == 0 ? 1 : 0;
@@ -905,8 +906,8 @@ static int do_nand(struct cmd_tbl *cmdtp, int flag, int argc,
 			return 1;
 		}
 
-		off = round_down(off, mtd->erasesize);
-		endoff = round_up(endoff, mtd->erasesize);
+		off = round_down(off, (loff_t)mtd->erasesize);
+		endoff = round_up(endoff, (loff_t)mtd->erasesize);
 		size = endoff - off;
 		printf("\nNAND torture: device %d offset 0x%llx size 0x%llx (block size 0x%x)\n",
 		       dev, off, size, mtd->erasesize);
@@ -933,17 +934,17 @@ static int do_nand(struct cmd_tbl *cmdtp, int flag, int argc,
 			goto usage;
 
 		while (argc > 0) {
-			addr = hextoul(*argv, NULL);
+			off = simple_strtoull(*argv, NULL, 16);
 
-			if (mtd_block_markbad(mtd, addr)) {
-				printf("block 0x%08lx NOT marked "
+			if (mtd_block_markbad(mtd, off)) {
+				printf("block 0x%08llx NOT marked "
 					"as bad! ERROR %d\n",
-					addr, ret);
+					off, ret);
 				ret = 1;
 			} else {
-				printf("block 0x%08lx successfully "
+				printf("block 0x%08llx successfully "
 					"marked as bad\n",
-					addr);
+					off);
 			}
 			--argc;
 			++argv;
@@ -957,7 +958,7 @@ static int do_nand(struct cmd_tbl *cmdtp, int flag, int argc,
 		if (argc != 4)
 			goto usage;
 
-		off = (int)simple_strtoul(argv[2], NULL, 16);
+		off = simple_strtoul(argv[2], NULL, 16);
 		bit = (int)simple_strtoul(argv[3], NULL, 10);
 		ret = nand_biterror(mtd, off, bit);
 		return ret;
@@ -1078,7 +1079,7 @@ U_BOOT_CMD(
 );
 
 static int nand_load_image(struct cmd_tbl *cmdtp, struct mtd_info *mtd,
-			   ulong offset, ulong addr, char *cmd)
+			   loff_t offset, ulong addr, char *cmd)
 {
 	int r;
 	char *s;
@@ -1098,7 +1099,7 @@ static int nand_load_image(struct cmd_tbl *cmdtp, struct mtd_info *mtd,
 		return 1;
 	}
 
-	printf("\nLoading from %s, offset 0x%lx\n", mtd->name, offset);
+	printf("\nLoading from %s, offset 0x%llx\n", mtd->name, offset);
 
 	cnt = mtd->writesize;
 	r = nand_read_skip_bad(mtd, offset, &cnt, NULL, mtd->size,
