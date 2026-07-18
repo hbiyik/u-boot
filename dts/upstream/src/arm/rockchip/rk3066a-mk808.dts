@@ -178,18 +178,40 @@
 &nfc {
 	#address-cells = <1>;
 	#size-cells = <0>;
+	pinctrl-0 = <&nand_csn1 &nand_csn2 &nand_csn3 &nand_dqs>;
+	pinctrl-names = "default";
 	status = "okay";
 
 	nand@0 {
-		reg = <0>;
+		reg = <0>, <2>;
 		label = "rk-nand";
 		nand-bus-width = <8>;
 		nand-ecc-mode = "hw";
 		nand-ecc-step-size = <1024>;
 		nand-ecc-strength = <40>;
 		nand-is-boot-medium;
+		nand-rwpw = <3>;
 		rockchip,boot-blks = <8>;
 		rockchip,boot-ecc-strength = <24>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <2>;
+			#size-cells = <2>;
+
+			// block 0 - 7
+			idb@0 {
+				label = "idb";
+				reg = <0x0 0x00000000 0x0 0x1000000>;
+			};
+
+			// block 8 - end
+			part_ubi: linux@1000000 {
+				label = "ubi";
+				reg = <0x0 0x1000000 0x3 0xFF000000>;
+				slc-mode;
+			};
+		};
 	};
 };
 
@@ -215,6 +237,21 @@
 	sdio {
 		wifi_pwr: wifi-pwr {
 			rockchip,pins = <3 RK_PD0 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	nand {
+		nand_csn1: nand-csn1 {
+			rockchip,pins = <4 RK_PB0 1 &pcfg_pull_none>;
+		};
+		nand_csn2: nand-csn2 {
+			rockchip,pins = <4 RK_PB1 1 &pcfg_pull_none>;
+		};
+		nand_csn3: nand-csn3 {
+			rockchip,pins = <4 RK_PB2 1 &pcfg_pull_none>;
+		};
+		nand_dqs: nand-dqs {
+			rockchip,pins = <3 RK_PD7 1 &pcfg_pull_none>;
 		};
 	};
 };

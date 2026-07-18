@@ -6,6 +6,14 @@
 	config {
 		u-boot,boot-led = "mk808:blue:power";
 	};
+
+	aliases {
+		nfc0 = &nfc;
+	};
+
+	chosen {
+		u-boot,spl-boot-order = "nfc0", "dfu-xpl";
+	};
 };
 
 &cru {
@@ -46,4 +54,48 @@
 
 &uart2 {
 	bootph-all;
+};
+
+&usbphy0 {
+	bootph-all;
+};
+
+&usb_otg {
+	bootph-all;
+};
+
+&part_ubi {
+	bootph-pre-ram;
+};
+
+&nand_csn1 {
+	bootph-pre-ram;
+};
+
+&nand_csn2 {
+	bootph-pre-ram;
+};
+
+&nand_csn3 {
+	bootph-pre-ram;
+};
+
+&nand_dqs {
+	bootph-pre-ram;
+};
+
+&grf {
+	bootph-pre-ram;
+};
+
+&pinctrl {
+	bootph-pre-ram;
+};
+
+&pcfg_pull_default {
+	bootph-pre-ram;
+};
+
+&pcfg_pull_none {
+	bootph-pre-ram;
 };
