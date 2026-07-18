@@ -1952,6 +1952,7 @@ static int nand_read_page_raw_syndrome(struct mtd_info *mtd,
 	return 0;
 }
 
+#if CONFIG_IS_ENABLED(NAND_SOFTECC) || !CONFIG_XPL_BUILD
 /**
  * nand_read_page_swecc - [REPLACEABLE] software ECC based page read function
  * @mtd: mtd info structure
@@ -1996,6 +1997,7 @@ static int nand_read_page_swecc(struct mtd_info *mtd, struct nand_chip *chip,
 	}
 	return max_bitflips;
 }
+#endif
 
 /**
  * nand_read_subpage - [REPLACEABLE] ECC based sub-page read function
@@ -2980,6 +2982,8 @@ static int nand_write_page_raw_syndrome(struct mtd_info *mtd,
 
 	return 0;
 }
+
+#if CONFIG_IS_ENABLED(NAND_SOFTECC) || !CONFIG_XPL_BUILD
 /**
  * nand_write_page_swecc - [REPLACEABLE] software ECC based page write function
  * @mtd: mtd info structure
@@ -3008,6 +3012,7 @@ static int nand_write_page_swecc(struct mtd_info *mtd, struct nand_chip *chip,
 
 	return chip->ecc.write_page_raw(mtd, chip, buf, 1, page);
 }
+#endif
 
 /**
  * nand_write_page_hwecc - [REPLACEABLE] hardware ECC based page write function
@@ -5191,6 +5196,7 @@ int nand_scan_tail(struct mtd_info *mtd)
 		ecc->mode = NAND_ECC_SOFT;
 
 		fallthrough;
+#if CONFIG_IS_ENABLED(NAND_SOFTECC) || !CONFIG_XPL_BUILD
 	case NAND_ECC_SOFT:
 		ecc->calculate = nand_calculate_ecc;
 		ecc->correct = nand_correct_data;
@@ -5239,6 +5245,7 @@ int nand_scan_tail(struct mtd_info *mtd)
 			BUG();
 		}
 		break;
+#endif
 
 	case NAND_ECC_NONE:
 		pr_warn("NAND_ECC_NONE selected by board driver. This is not recommended!\n");
