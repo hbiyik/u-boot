@@ -1045,6 +1045,12 @@ static int nand_wait(struct mtd_info *mtd, struct nand_chip *chip)
  *
  * Returns 0 for success or negative error code otherwise.
  */
+#ifndef CONFIG_NAND_TIMINGS
+	static int nand_reset_data_interface(struct nand_chip *chip, int chipnr)
+{
+	return 0;
+}
+#else
 static int nand_reset_data_interface(struct nand_chip *chip, int chipnr)
 {
 	struct mtd_info *mtd = nand_to_mtd(chip);
@@ -1075,6 +1081,7 @@ static int nand_reset_data_interface(struct nand_chip *chip, int chipnr)
 
 	return ret;
 }
+#endif
 
 static int nand_onfi_set_timings(struct mtd_info *mtd, struct nand_chip *chip)
 {
@@ -1142,8 +1149,7 @@ err:
  */
 static int nand_init_data_interface(struct nand_chip *chip)
 {
-	struct mtd_info *mtd = nand_to_mtd(chip);
-	int modes, mode, ret;
+	int modes;
 
 	if (!chip->setup_data_interface)
 		return 0;
@@ -1166,6 +1172,9 @@ static int nand_init_data_interface(struct nand_chip *chip)
 	if (!chip->data_interface)
 		return -ENOMEM;
 
+#ifdef CONFIG_NAND_TIMINGS
+	struct mtd_info *mtd = nand_to_mtd(chip);
+	int mode, ret;
 	for (mode = fls(modes) - 1; mode >= 0; mode--) {
 		ret = onfi_init_data_interface(chip, chip->data_interface,
 					       NAND_SDR_IFACE, mode);
@@ -1181,7 +1190,7 @@ static int nand_init_data_interface(struct nand_chip *chip)
 			break;
 		}
 	}
-
+#endif
 	return 0;
 }
 
