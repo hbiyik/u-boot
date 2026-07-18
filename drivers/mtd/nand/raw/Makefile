@@ -7,6 +7,7 @@ obj-$(CONFIG_NAND_CHIP_TOSHIBA) += nand_toshiba.o
 obj-$(CONFIG_NAND_CHIP_SAMSUNG) += nand_samsung.o
 obj-$(CONFIG_NAND_CHIP_HYNIX) += nand_hynix.o
 obj-$(CONFIG_NAND_CHIP_MICRON) += nand_micron.o
+obj-$(CONFIG_NAND_CHIP_AMD) += nand_amd.o
 
 ifdef CONFIG_XPL_BUILD
 
@@ -20,7 +21,7 @@ obj-$(CONFIG_SPL_NAND_DENALI) += denali_spl.o
 obj-$(CONFIG_SPL_NAND_SIMPLE) += nand_spl_simple.o
 obj-$(CONFIG_SPL_NAND_LOAD) += nand_spl_load.o
 obj-$(CONFIG_SPL_NAND_ECC) += nand_ecc.o
-obj-$(CONFIG_SPL_NAND_BASE) += nand_base.o nand_amd.o \
+obj-$(CONFIG_SPL_NAND_BASE) += nand_base.o \
 				nand_macronix.o
 obj-$(CONFIG_SPL_NAND_IDENT) += nand_ids.o nand_timings.o
 obj-$(CONFIG_$(PHASE_)NAND_INIT) += nand.o
@@ -36,7 +37,6 @@ obj-y += nand.o
 obj-y += nand_ids.o
 obj-y += nand_ecc.o
 obj-y += nand_base.o
-obj-y += nand_amd.o
 obj-y += nand_macronix.o
 obj-y += nand_timings.o
 

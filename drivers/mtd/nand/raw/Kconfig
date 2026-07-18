@@ -703,6 +703,14 @@ config NAND_CHIP_MICRON
 	help
 	  Disable to save space if Micron nand chip support is not required.
 
+config NAND_CHIP_AMD
+	bool "Enable Amd/Spansion NAND chip ops"
+	depends on SPL_NAND_BASE && SPL_NAND_SUPPORT || !SPL_NAND_SUPPORT
+	default y
+	help
+	  Disable to save space if Amd/Spansion nand chip support is not
+	  required.
+
 config SYS_NAND_PAGE_SIZE
 	hex "NAND chip page size"
 	depends on ARCH_SUNXI || NAND_OMAP_GPMC || \
