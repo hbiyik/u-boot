@@ -194,7 +194,9 @@ struct nand_manufacturer nand_manuf_ids[] = {
 #ifdef CONFIG_NAND_CHIP_SAMSUNG
 	{NAND_MFR_HYNIX, "Hynix", &hynix_nand_manuf_ops},
 #endif
+#ifdef CONFIG_NAND_CHIP_MICRON
 	{NAND_MFR_MICRON, "Micron", &micron_nand_manuf_ops},
+#endif
 	{NAND_MFR_AMD, "AMD/Spansion", &amd_nand_manuf_ops},
 	{NAND_MFR_MACRONIX, "Macronix", &macronix_nand_manuf_ops},
 	{NAND_MFR_EON, "Eon"},
