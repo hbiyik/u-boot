@@ -604,6 +604,11 @@ config ROCKCHIP_NAND
 	depends on ARCH_ROCKCHIP
 	select SYS_NAND_SELF_INIT
 	select DM_MTD
+	select SPL_SYS_NAND_SELF_INIT if SPL_NAND_DRIVERS
+	select SPL_NAND_INIT if SPL_NAND_DRIVERS
+	select SPL_NAND_BASE if SPL_NAND_DRIVERS
+	select SPL_NAND_IDENT if SPL_NAND_DRIVERS
+	select SPL_MTD if SPL_NAND_DRIVERS
 	imply CMD_NAND
 	help
 	  Enables support for NAND Flash chips on Rockchip SoCs platform.
