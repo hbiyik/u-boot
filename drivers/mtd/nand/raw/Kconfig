@@ -675,6 +675,13 @@ config NAND_CHIP_IDS
 	  Unselect to save space if nand chips can provide chip geomethry
 	  automatically
 
+config NAND_CHIP_TOSHIBA
+	bool "Enable Toshiba NAND chip ops"
+	depends on SPL_NAND_BASE && SPL_NAND_SUPPORT || !SPL_NAND_SUPPORT
+	default y
+	help
+	  Disable to save space if Toshiba nand chip support is not required.
+
 config SYS_NAND_PAGE_SIZE
 	hex "NAND chip page size"
 	depends on ARCH_SUNXI || NAND_OMAP_GPMC || \

@@ -181,7 +181,9 @@ struct nand_flash_dev nand_flash_ids[] = {
 
 /* Manufacturer IDs */
 struct nand_manufacturer nand_manuf_ids[] = {
+#ifdef CONFIG_NAND_CHIP_TOSHIBA
 	{NAND_MFR_TOSHIBA, "Toshiba", &toshiba_nand_manuf_ops},
+#endif
 	{NAND_MFR_SAMSUNG, "Samsung", &samsung_nand_manuf_ops},
 	{NAND_MFR_FUJITSU, "Fujitsu"},
 	{NAND_MFR_NATIONAL, "National"},
