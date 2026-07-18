@@ -689,6 +689,13 @@ config NAND_CHIP_SAMSUNG
 	help
 	  Disable to save space if Samsung nand chip support is not required.
 
+config NAND_CHIP_HYNIX
+	bool "Enable SK-Hynix NAND chip ops"
+	depends on SPL_NAND_BASE && SPL_NAND_SUPPORT || !SPL_NAND_SUPPORT
+	default y
+	help
+	  Disable to save space if SK-Hynix nand chip support is not required.
+
 config SYS_NAND_PAGE_SIZE
 	hex "NAND chip page size"
 	depends on ARCH_SUNXI || NAND_OMAP_GPMC || \
