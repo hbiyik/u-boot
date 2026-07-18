@@ -29,7 +29,6 @@ else # not spl
 NORMAL_DRIVERS=y
 
 obj-y += nand.o
-obj-y += nand_bbt.o
 obj-y += nand_ids.o
 obj-y += nand_util.o
 obj-y += nand_ecc.o
@@ -45,6 +44,8 @@ obj-y += nand_timings.o
 endif # not spl
 
 ifdef NORMAL_DRIVERS
+
+obj-y += nand_bbt.o
 
 obj-$(CONFIG_NAND_ECC_BCH) += nand_bch.o
 
