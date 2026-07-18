@@ -668,6 +668,13 @@ config SYS_NAND_ONFI_DETECTION
 	  And fetching device parameters flashed on device, by parsing
 	  ONFI parameter page.
 
+config NAND_CHIP_IDS
+	bool "Enable NAND chips IDs"
+	default y
+	help
+	  Unselect to save space if nand chips can provide chip geomethry
+	  automatically
+
 config SYS_NAND_PAGE_SIZE
 	hex "NAND chip page size"
 	depends on ARCH_SUNXI || NAND_OMAP_GPMC || \
