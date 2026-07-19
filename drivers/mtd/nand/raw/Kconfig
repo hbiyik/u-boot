@@ -620,6 +620,37 @@ config ROCKCHIP_NAND
 	    NFC v800: RK3308, RV1108
 	    NFC v900: PX30, RK3326
 
+config SPL_ROCKCHIP_NAND_CLOCKS
+	bool "Enable clock configuration for Rockchip NFC in SPL"
+	depends on ROCKCHIP_NAND && SPL_NAND_DRIVERS
+	default y
+	help
+	  Disable if clock configuration is not necessary in SPL.
+
+config ROCKCHIP_NAND_V6
+	bool "Enable Rockchip NFC v6"
+	depends on ROCKCHIP_NAND
+	default y
+	help
+	  Disable to save space if NFC v6 support is not needed.
+	  V6 is used in RK2928, RK3066, RK3188, RK3036, RK3128.
+
+config ROCKCHIP_NAND_V8
+	bool "Enable Rockchip NFC v8"
+	depends on ROCKCHIP_NAND
+	default y
+	help
+	  Disable to save space if NFC v8 support is not needed.
+	  V8 is used in RK3308, RV1108.
+
+config ROCKCHIP_NAND_V9
+	bool "Enable Rockchip NFC v9"
+	depends on ROCKCHIP_NAND
+	default y
+	help
+	  Disable to save space if NFC v9 support is not needed.
+	  V9 is used in PX30, RK3326.
+
 config ROCKCHIP_NAND_SKIP_BBTSCAN
 	bool "Skip the automatic BBT scan with Rockchip NAND controllers"
 	depends on ROCKCHIP_NAND

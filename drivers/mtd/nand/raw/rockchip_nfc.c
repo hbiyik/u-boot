@@ -428,6 +428,7 @@ static int rk_nfc_wait_for_xfer_done(struct rk_nfc *nfc)
 	return -ETIMEDOUT;
 }
 
+#if !CONFIG_XPL_BUILD
 static int rk_nfc_write_page_raw(struct mtd_info *mtd,
 				 struct nand_chip *chip,
 				 const u8 *buf,
@@ -510,6 +511,7 @@ static int rk_nfc_write_page_raw(struct mtd_info *mtd,
 	rk_nfc_write_buf(mtd, buf, mtd->writesize + mtd->oobsize);
 	return nand_prog_page_end_op(chip);
 }
+#endif
 
 static int rk_nfc_write_page_hwecc(struct mtd_info *mtd,
 				   struct nand_chip *chip,
@@ -614,6 +616,7 @@ static int rk_nfc_write_oob(struct mtd_info *mtd,
 	return rk_nfc_write_page_hwecc(mtd, chip, NULL, 1, page);
 }
 
+#if !CONFIG_XPL_BUILD
 static int rk_nfc_read_page_raw(struct mtd_info *mtd,
 				struct nand_chip *chip,
 				u8 *buf,
@@ -669,6 +672,7 @@ static int rk_nfc_read_page_raw(struct mtd_info *mtd,
 
 	return 0;
 }
+#endif
 
 static int rk_nfc_read_page_hwecc(struct mtd_info *mtd,
 				  struct nand_chip *chip,
@@ -796,6 +800,7 @@ static inline void rk_nfc_hw_init(struct rk_nfc *nfc)
 	writel(FLCTL_RST, nfc->regs + nfc->cfg->flctl_off);
 }
 
+#if IS_ENABLED(CONFIG_ROCKCHIP_NAND_CLOCKS) || !CONFIG_XPL_BUILD
 static int rk_nfc_enable_clks(struct udevice *dev, struct rk_nfc *nfc)
 {
 	int ret;
@@ -822,6 +827,7 @@ static void rk_nfc_disable_clks(struct rk_nfc *nfc)
 		clk_disable_unprepare(nfc->nfc_clk);
 	clk_disable_unprepare(nfc->ahb_clk);
 }
+#endif
 
 static int rk_nfc_ecc_init(struct rk_nfc *nfc, struct nand_chip *chip)
 {
@@ -1004,10 +1010,12 @@ static int rk_nfc_nand_chip_init(ofnode node, struct rk_nfc *nfc, int devnum)
 	}
 
 	ecc->read_page = rk_nfc_read_page_hwecc;
+#if !CONFIG_XPL_BUILD
 	ecc->read_page_raw = rk_nfc_read_page_raw;
+	ecc->write_page_raw = rk_nfc_write_page_raw;
+#endif
 	ecc->read_oob = rk_nfc_read_oob;
 	ecc->write_page = rk_nfc_write_page_hwecc;
-	ecc->write_page_raw = rk_nfc_write_page_raw;
 	ecc->write_oob = rk_nfc_write_oob;
 
 	ret = nand_scan_tail(mtd);
@@ -1032,7 +1040,7 @@ static int rk_nfc_nand_chips_init(struct udevice *dev, struct rk_nfc *nfc)
 
 	return 0;
 }
-
+#if IS_ENABLED(CONFIG_ROCKCHIP_NAND_V6)
 static struct nfc_cfg nfc_v6_cfg = {
 		.type			= NFC_V6,
 		.ecc_strengths		= {60, 40, 24, 16},
@@ -1069,7 +1077,8 @@ static struct nfc_cfg nfc_v6_cfg = {
 			.high_mask	= 0x1,
 		},
 };
-
+#endif
+#if IS_ENABLED(CONFIG_ROCKCHIP_NAND_V8)
 static struct nfc_cfg nfc_v8_cfg = {
 		.type			= NFC_V8,
 		.ecc_strengths		= {16, 16, 16, 16},
@@ -1106,7 +1115,8 @@ static struct nfc_cfg nfc_v8_cfg = {
 			.high_mask	= 0x1,
 		},
 };
-
+#endif
+#if IS_ENABLED(CONFIG_ROCKCHIP_NAND_V9)
 static struct nfc_cfg nfc_v9_cfg = {
 		.type			= NFC_V9,
 		.ecc_strengths		= {70, 60, 40, 16},
@@ -1143,20 +1153,27 @@ static struct nfc_cfg nfc_v9_cfg = {
 			.high_mask	= 0x0,
 		},
 };
+#endif
 
 static const struct udevice_id rk_nfc_id_table[] = {
+#if IS_ENABLED(CONFIG_ROCKCHIP_NAND_V9)
 	{
 		.compatible = "rockchip,px30-nfc",
 		.data = (unsigned long)&nfc_v9_cfg
 	},
+#endif
+#if IS_ENABLED(CONFIG_ROCKCHIP_NAND_V6)
 	{
 		.compatible = "rockchip,rk2928-nfc",
 		.data = (unsigned long)&nfc_v6_cfg
 	},
+#endif
+#if IS_ENABLED(CONFIG_ROCKCHIP_NAND_V8)
 	{
 		.compatible = "rockchip,rv1108-nfc",
 		.data = (unsigned long)&nfc_v8_cfg
 	},
+#endif
 	{ /* sentinel */ }
 };
 
@@ -1174,6 +1191,7 @@ static int rk_nfc_probe(struct udevice *dev)
 		goto release_nfc;
 	}
 
+#if IS_ENABLED(CONFIG_ROCKCHIP_NAND_CLOCKS) || !CONFIG_XPL_BUILD
 	nfc->nfc_clk = devm_clk_get(dev, "nfc");
 	if (IS_ERR(nfc->nfc_clk)) {
 		dev_dbg(dev, "no NFC clk\n");
@@ -1190,6 +1208,7 @@ static int rk_nfc_probe(struct udevice *dev)
 	ret = rk_nfc_enable_clks(dev, nfc);
 	if (ret)
 		goto release_nfc;
+#endif
 
 	spin_lock_init(&nfc->controller.lock);
 	init_waitqueue_head(&nfc->controller.wq);
@@ -1204,7 +1223,9 @@ static int rk_nfc_probe(struct udevice *dev)
 	return 0;
 
 clk_disable:
+#if IS_ENABLED(CONFIG_ROCKCHIP_NAND_CLOCKS) || !CONFIG_XPL_BUILD
 	rk_nfc_disable_clks(nfc);
+#endif
 release_nfc:
 	return ret;
 }
