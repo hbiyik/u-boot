@@ -954,7 +954,7 @@ static int rk_nfc_nand_chip_init(ofnode node, struct rk_nfc *nfc, int devnum)
 
 	mtd = nand_to_mtd(chip);
 	mtd->owner = THIS_MODULE;
-	mtd->dev->parent = dev;
+	mtd->dev = dev;
 
 	nand_set_controller_data(chip, nfc);
 
