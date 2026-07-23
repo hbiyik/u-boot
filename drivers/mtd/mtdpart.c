@@ -894,13 +894,12 @@ int add_mtd_partitions_of(struct mtd_info *master)
 	ofnode parts, child;
 	int i = 0;
 
-	if (!master->dev && !ofnode_valid(master->flash_node))
-		return 0;
-
-	if (master->dev)
+	if (ofnode_valid(master->flash_node))
+ 		parts = ofnode_find_subnode(master->flash_node, "partitions");
+	else if (master->dev)
 		parts = ofnode_find_subnode(mtd_get_ofnode(master), "partitions");
 	else
-		parts = ofnode_find_subnode(master->flash_node, "partitions");
+		return 0;
 
 	if (!ofnode_valid(parts) || !ofnode_is_enabled(parts) ||
 	    !ofnode_device_is_compatible(parts, "fixed-partitions"))
