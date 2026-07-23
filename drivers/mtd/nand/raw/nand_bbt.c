@@ -231,7 +231,7 @@ static int read_bbt(struct mtd_info *mtd, uint8_t *buf, int page, int num,
 				 * Leave it for now, if it's matured we can
 				 * move this message to pr_debug.
 				 */
-				pr_info("nand_read_bbt: bad block at 0x%012llx\n",
+				pr_debug("nand_read_bbt: bad block at 0x%012llx\n",
 					 (loff_t)(offs + act) <<
 					 this->bbt_erase_shift);
 				/* Factory marked bad or worn out? */
