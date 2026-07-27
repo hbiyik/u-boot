@@ -1062,7 +1062,7 @@ static int do_mtd_nand_read_test(struct cmd_tbl *cmdtp, int flag, int argc,
 				 char *const argv[])
 {
 	struct mtd_info		*mtd;
-	u64			off, blocks;
+	u64			off, len, end, blocks;
 	int			stat[NAND_READ_STATUS_OK + 1];
 	enum nand_read_status	ret;
 	u_char			*buf;
@@ -1084,24 +1084,50 @@ static int do_mtd_nand_read_test(struct cmd_tbl *cmdtp, int flag, int argc,
 		goto test_error;
 	}
 
+	argc -= 2;
+	argv += 2;
+
+	off = argc > 0 ? hextoull(argv[0], NULL) : 0;
+	len = argc > 1 ? hextoull(argv[1], NULL) : mtd->size - off;
+
+	if (!mtd_is_aligned_with_block_size(mtd, off)) {
+		printf("Offset not aligned with a block (0x%x)\n",
+		       mtd->erasesize);
+		goto test_error;
+	}
+
+	if (!mtd_is_aligned_with_block_size(mtd, len)) {
+		printf("Size not a multiple of a block (0x%x)\n",
+		       mtd->erasesize);
+		goto test_error;
+	}
+
+	end = off + len;
+	if (end > mtd->size) {
+		printf("Offset + size exceeds device size 0x%llx\n",
+		       mtd->size);
+		goto test_error;
+	}
+
 	buf = malloc_cache_aligned(2 * mtd->erasesize);
 	if (!buf) {
 		printf("Can't allocate memory for the test\n");
 		goto test_error;
 	}
 
-	blocks = mtd->size;
+	blocks = len;
 	do_div(blocks, mtd->erasesize);
 
 	printf("ECC strength:     %d\n",   mtd->ecc_strength);
 	printf("ECC theshold:     %d\n",   mtd->bitflip_threshold);
 	printf("ECC step size:    %d\n",   mtd->ecc_step_size);
 	printf("Erase block size: 0x%x\n", mtd->erasesize);
+	printf("Start offset:     0x%llx\n", off);
 	printf("Total blocks:     %lld\n", blocks);
 
 	printf("\nworking...\n");
 	memset(stat, 0, sizeof(stat));
-	for (off = 0; off < mtd->size; off += mtd->erasesize) {
+	for (; off < end; off += mtd->erasesize) {
 		ret = nand_read_block_check(mtd, off, mtd->erasesize, buf);
 		stat[ret]++;
 
@@ -1237,7 +1263,7 @@ U_BOOT_LONGHELP(mtd,
 	"mtd nand_write_test                             <name>        [<off> [<size>]]\n"
 #endif
 #if CONFIG_IS_ENABLED(CMD_MTD_NAND_READ_TEST)
-	"mtd nand_read_test                              <name>\n"
+	"mtd nand_read_test                              <name>        [<off> [<size>]]\n"
 #endif
 	"\n"
 	"With:\n"
@@ -1282,7 +1308,7 @@ U_BOOT_CMD_WITH_SUBCMDS(mtd, "MTD utils", mtd_help_text,
 					     mtd_name_complete),
 #endif
 #if CONFIG_IS_ENABLED(CMD_MTD_NAND_READ_TEST)
-		U_BOOT_SUBCMD_MKENT_COMPLETE(nand_read_test, 2, 0,
+		U_BOOT_SUBCMD_MKENT_COMPLETE(nand_read_test, 4, 0,
 					     do_mtd_nand_read_test,
 					     mtd_name_complete),
 #endif
