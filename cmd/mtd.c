@@ -212,7 +212,7 @@ static int do_mtd_otp_read(struct cmd_tbl *cmdtp, int flag, int argc,
 {
 	struct mtd_info *mtd;
 	size_t retlen;
-	off_t from;
+	loff_t from;
 	size_t len;
 	bool user;
 	int ret;
@@ -232,8 +232,8 @@ static int do_mtd_otp_read(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (IS_ERR_OR_NULL(mtd))
 		return CMD_RET_FAILURE;
 
-	from = simple_strtoul(argv[3], NULL, 0);
-	len = simple_strtoul(argv[4], NULL, 0);
+	from = simple_strtoull(argv[3], NULL, 0);
+	len = simple_strtoull(argv[4], NULL, 0);
 
 	ret = CMD_RET_FAILURE;
 
@@ -241,7 +241,7 @@ static int do_mtd_otp_read(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (!buf)
 		goto put_mtd;
 
-	printf("Reading %s OTP from 0x%lx, %zu bytes\n",
+	printf("Reading %s OTP from 0x%llx, %zu bytes\n",
 	       user ? "user" : "factory", from, len);
 
 	if (user)
@@ -275,7 +275,7 @@ static int do_mtd_otp_lock(struct cmd_tbl *cmdtp, int flag, int argc,
 			   char *const argv[])
 {
 	struct mtd_info *mtd;
-	off_t from;
+	loff_t from;
 	size_t len;
 	int ret;
 
@@ -286,8 +286,8 @@ static int do_mtd_otp_lock(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (IS_ERR_OR_NULL(mtd))
 		return CMD_RET_FAILURE;
 
-	from = simple_strtoul(argv[2], NULL, 0);
-	len = simple_strtoul(argv[3], NULL, 0);
+	from = simple_strtoull(argv[2], NULL, 0);
+	len = simple_strtoull(argv[3], NULL, 0);
 
 	ret = mtd_lock_user_prot_reg(mtd, from, len);
 	if (ret) {
@@ -311,7 +311,7 @@ static int do_mtd_otp_write(struct cmd_tbl *cmdtp, int flag, int argc,
 	size_t retlen;
 	size_t binlen;
 	u8 *binbuf;
-	off_t from;
+	loff_t from;
 	int ret;
 
 	if (argc != 4)
@@ -321,7 +321,7 @@ static int do_mtd_otp_write(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (IS_ERR_OR_NULL(mtd))
 		return CMD_RET_FAILURE;
 
-	from = simple_strtoul(argv[2], NULL, 0);
+	from = simple_strtoull(argv[2], NULL, 0);
 	binlen = strlen(argv[3]) / 2;
 
 	ret = CMD_RET_FAILURE;
@@ -335,7 +335,7 @@ static int do_mtd_otp_write(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	print_hex_dump("", 0, 16, 1, binbuf, binlen, true);
 
-	printf("to 0x%lx\n", from);
+	printf("to 0x%llx\n", from);
 
 	printf("Continue (y/n)?\n");
 
@@ -511,7 +511,7 @@ static int do_mtd_io(struct cmd_tbl *cmdtp, int flag, int argc,
 		argv++;
 	}
 
-	start_off = argc > 0 ? hextoul(argv[0], NULL) : 0;
+	start_off = argc > 0 ? hextoull(argv[0], NULL) : 0;
 	if (!mtd_is_aligned_with_min_io_size(mtd, start_off)) {
 		printf("Offset not aligned with a page (0x%x)\n",
 		       mtd->writesize);
@@ -520,7 +520,7 @@ static int do_mtd_io(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 
 	default_len = dump ? mtd->writesize : mtd->size;
-	len = argc > 1 ? hextoul(argv[1], NULL) : default_len;
+	len = argc > 1 ? hextoull(argv[1], NULL) : default_len;
 	if (!mtd_is_aligned_with_min_io_size(mtd, len)) {
 		len = round_up(len, mtd->writesize);
 		printf("Size not on a page boundary (0x%x), rounding to 0x%llx\n",
@@ -647,8 +647,8 @@ static int do_mtd_erase(struct cmd_tbl *cmdtp, int flag, int argc,
 	argc -= 2;
 	argv += 2;
 
-	off = argc > 0 ? hextoul(argv[0], NULL) : 0;
-	len = argc > 1 ? hextoul(argv[1], NULL) : mtd->size;
+	off = argc > 0 ? hextoull(argv[0], NULL) : 0;
+	len = argc > 1 ? hextoull(argv[1], NULL) : mtd->size;
 
 	if (!mtd_is_aligned_with_block_size(mtd, off)) {
 		printf("Offset not aligned with a block (0x%x)\n",
@@ -737,7 +737,7 @@ static int do_mtd_markbad(struct cmd_tbl *cmdtp, int flag, int argc,
 	argc -= 2;
 	argv += 2;
 	while (argc > 0) {
-		off = hextoul(argv[0], NULL);
+		off = hextoull(argv[0], NULL);
 		if (!mtd_is_aligned_with_block_size(mtd, off)) {
 			printf("Offset not aligned with a block (0x%x)\n",
 			       mtd->erasesize);
@@ -907,8 +907,8 @@ static int do_nand_write_test(struct cmd_tbl *cmdtp, int flag, int argc,
 	argc -= 2;
 	argv += 2;
 
-	off = argc > 0 ? hextoul(argv[0], NULL) : 0;
-	len = argc > 1 ? hextoul(argv[1], NULL) : mtd->size;
+	off = argc > 0 ? hextoull(argv[0], NULL) : 0;
+	len = argc > 1 ? hextoull(argv[1], NULL) : mtd->size;
 
 	if (!mtd_is_aligned_with_block_size(mtd, off)) {
 		printf("Offset not aligned with a block (0x%x)\n",
