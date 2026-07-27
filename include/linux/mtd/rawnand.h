@@ -630,12 +630,15 @@ struct nand_ecc_ctrl {
 			uint8_t *calc_ecc);
 	int (*read_page_raw)(struct mtd_info *mtd, struct nand_chip *chip,
 			uint8_t *buf, int oob_required, int page);
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 	int (*write_page_raw)(struct mtd_info *mtd, struct nand_chip *chip,
 			const uint8_t *buf, int oob_required, int page);
+#endif /* !NAND_RO || !XPL_BUILD */
 	int (*read_page)(struct mtd_info *mtd, struct nand_chip *chip,
 			uint8_t *buf, int oob_required, int page);
 	int (*read_subpage)(struct mtd_info *mtd, struct nand_chip *chip,
 			uint32_t offs, uint32_t len, uint8_t *buf, int page);
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 	int (*write_subpage)(struct mtd_info *mtd, struct nand_chip *chip,
 			uint32_t offset, uint32_t data_len,
 			const uint8_t *data_buf, int oob_required, int page);
@@ -643,11 +646,14 @@ struct nand_ecc_ctrl {
 			const uint8_t *buf, int oob_required, int page);
 	int (*write_oob_raw)(struct mtd_info *mtd, struct nand_chip *chip,
 			int page);
+#endif /* !NAND_RO || !XPL_BUILD */
 	int (*read_oob_raw)(struct mtd_info *mtd, struct nand_chip *chip,
 			int page);
 	int (*read_oob)(struct mtd_info *mtd, struct nand_chip *chip, int page);
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 	int (*write_oob)(struct mtd_info *mtd, struct nand_chip *chip,
 			int page);
+#endif /* !NAND_RO || !XPL_BUILD */
 };
 
 static inline int nand_standard_page_accessors(struct nand_ecc_ctrl *ecc)
@@ -927,7 +933,9 @@ struct nand_chip {
 	void (*read_buf)(struct mtd_info *mtd, uint8_t *buf, int len);
 	void (*select_chip)(struct mtd_info *mtd, int chip);
 	int (*block_bad)(struct mtd_info *mtd, loff_t ofs);
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 	int (*block_markbad)(struct mtd_info *mtd, loff_t ofs);
+#endif /* !NAND_RO || !XPL_BUILD */
 	void (*cmd_ctrl)(struct mtd_info *mtd, int dat, unsigned int ctrl);
 	int (*dev_ready)(struct mtd_info *mtd);
 	void (*cmdfunc)(struct mtd_info *mtd, unsigned command, int column,
@@ -935,9 +943,11 @@ struct nand_chip {
 	int(*waitfunc)(struct mtd_info *mtd, struct nand_chip *this);
 	int (*erase)(struct mtd_info *mtd, int page);
 	int (*scan_bbt)(struct mtd_info *mtd);
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 	int (*write_page)(struct mtd_info *mtd, struct nand_chip *chip,
 			uint32_t offset, int data_len, const uint8_t *buf,
 			int oob_required, int page, int raw);
+#endif /* !NAND_RO || !XPL_BUILD */
 	int (*onfi_set_features)(struct mtd_info *mtd, struct nand_chip *chip,
 			int feature_addr, uint8_t *subfeature_para);
 	int (*onfi_get_features)(struct mtd_info *mtd, struct nand_chip *chip,

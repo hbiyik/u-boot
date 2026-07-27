@@ -76,7 +76,9 @@
 #define BBT_ENTRY_MASK		0x03
 #define BBT_ENTRY_SHIFT		2
 
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 static int nand_update_bbt(struct mtd_info *mtd, loff_t offs);
+#endif
 
 static inline uint8_t bbt_get_entry(struct nand_chip *chip, int block)
 {
@@ -350,6 +352,7 @@ static int scan_read(struct mtd_info *mtd, uint8_t *buf, loff_t offs,
 		return scan_read_oob(mtd, buf, offs, len);
 }
 
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 /* Scan write data with oob to flash */
 static int scan_write_bbt(struct mtd_info *mtd, loff_t offs, size_t len,
 			  uint8_t *buf, uint8_t *oob)
@@ -365,6 +368,7 @@ static int scan_write_bbt(struct mtd_info *mtd, loff_t offs, size_t len,
 
 	return mtd_write_oob(mtd, offs, &ops);
 }
+#endif
 
 static u32 bbt_get_ver_offs(struct mtd_info *mtd, struct nand_bbt_descr *td)
 {
@@ -604,6 +608,7 @@ static void search_read_bbts(struct mtd_info *mtd, uint8_t *buf,
 		search_bbt(mtd, buf, md);
 }
 
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 /**
  * write_bbt - [GENERIC] (Re)write the bad block table
  * @mtd: MTD device structure
@@ -808,6 +813,7 @@ static int write_bbt(struct mtd_info *mtd, uint8_t *buf,
 	pr_warn("nand_bbt: error while writing bad block table %d\n", res);
 	return res;
 }
+#endif
 
 /**
  * nand_memory_bbt - [GENERIC] create a memory based bad block table
@@ -934,7 +940,7 @@ static int check_create(struct mtd_info *mtd, uint8_t *buf, struct nand_bbt_desc
 			td->version[i] = max(td->version[i], md->version[i]);
 			md->version[i] = td->version[i];
 		}
-
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 		/* Write the bad block table to the device? */
 		if ((writeops & 0x01) && (td->options & NAND_BBT_WRITE)) {
 			res = write_bbt(mtd, buf, td, md, chipsel);
@@ -948,6 +954,7 @@ static int check_create(struct mtd_info *mtd, uint8_t *buf, struct nand_bbt_desc
 			if (res < 0)
 				return res;
 		}
+#endif
 	}
 	return 0;
 }
@@ -983,12 +990,15 @@ static void mark_bbt_region(struct mtd_info *mtd, struct nand_bbt_descr *td)
 			block = td->pages[i] >> (this->bbt_erase_shift - this->page_shift);
 			oldval = bbt_get_entry(this, block);
 			bbt_mark_entry(this, block, BBT_BLOCK_RESERVED);
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 			if ((oldval != BBT_BLOCK_RESERVED) &&
 					td->reserved_block_code)
 				nand_update_bbt(mtd, (loff_t)block <<
 						this->bbt_erase_shift);
+#endif
 			continue;
 		}
+
 		update = 0;
 		if (td->options & NAND_BBT_LASTBLOCK)
 			block = ((i + 1) * nrblocks) - td->maxblocks;
@@ -1001,6 +1011,7 @@ static void mark_bbt_region(struct mtd_info *mtd, struct nand_bbt_descr *td)
 				update = 1;
 			block++;
 		}
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 		/*
 		 * If we want reserved blocks to be recorded to flash, and some
 		 * new ones have been marked, then we need to update the stored
@@ -1009,6 +1020,7 @@ static void mark_bbt_region(struct mtd_info *mtd, struct nand_bbt_descr *td)
 		if (update && td->reserved_block_code)
 			nand_update_bbt(mtd, (loff_t)(block - 1) <<
 					this->bbt_erase_shift);
+#endif
 	}
 }
 
@@ -1138,6 +1150,7 @@ err:
 	return res;
 }
 
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 /**
  * nand_update_bbt - update bad block table(s)
  * @mtd: MTD device structure
@@ -1192,6 +1205,7 @@ static int nand_update_bbt(struct mtd_info *mtd, loff_t offs)
 	kfree(buf);
 	return res;
 }
+#endif
 
 /*
  * Define some generic bad / good block scan pattern which are used
@@ -1353,6 +1367,7 @@ int nand_isbad_bbt(struct mtd_info *mtd, loff_t offs, int allowbbt)
 	return 1;
 }
 
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 /**
  * nand_markbad_bbt - [NAND Interface] Mark a block bad in the BBT
  * @mtd: MTD device structure
@@ -1374,3 +1389,4 @@ int nand_markbad_bbt(struct mtd_info *mtd, loff_t offs)
 
 	return ret;
 }
+#endif

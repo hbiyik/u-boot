@@ -1012,11 +1012,15 @@ static int rk_nfc_nand_chip_init(ofnode node, struct rk_nfc *nfc, int devnum)
 	ecc->read_page = rk_nfc_read_page_hwecc;
 #if !CONFIG_XPL_BUILD
 	ecc->read_page_raw = rk_nfc_read_page_raw;
-	ecc->write_page_raw = rk_nfc_write_page_raw;
 #endif
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
+	ecc->write_page_raw = rk_nfc_write_page_raw;
+#endif /* !NAND_RO || !XPL_BUILD */
 	ecc->read_oob = rk_nfc_read_oob;
+#if !CONFIG_IS_ENABLED(NAND_RO) || !CONFIG_XPL_BUILD
 	ecc->write_page = rk_nfc_write_page_hwecc;
 	ecc->write_oob = rk_nfc_write_oob;
+#endif /* !NAND_RO || !XPL_BUILD */
 
 	ret = nand_scan_tail(mtd);
 	if (ret) {

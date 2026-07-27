@@ -1011,6 +1011,13 @@ config SPL_NAND_DRIVERS
 	help
 	  SPL uses normal NAND drivers, not minimal drivers.
 
+config SPL_NAND_RO
+	bool "NAND Driver Read-Only"
+	depends on SPL_NAND_DRIVERS
+	default n
+	help
+	  SPL uses normal NAND drivers in read only mode.
+
 config SPL_NAND_ECC
 	bool "Include standard ECC in SPL"
 
