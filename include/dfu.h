@@ -26,6 +26,7 @@ enum dfu_device_type {
 	DFU_DEV_VIRT,
 	DFU_DEV_SCSI,
 	DFU_DEV_UBI,
+	DFU_DEV_RKMTD,
 };
 
 enum dfu_layout {
@@ -128,6 +129,12 @@ struct ubi_internal_data {
 	size_t wr_cap;
 };
 
+struct rkmtd_internal_data {
+	struct udevice *dev;
+	u64 start;
+	u64 size;
+};
+
 #if defined(CONFIG_DFU_NAME_MAX_SIZE)
 #define DFU_NAME_SIZE			CONFIG_DFU_NAME_MAX_SIZE
 #else
@@ -157,6 +164,7 @@ struct dfu_entity {
 		struct virt_internal_data virt;
 		struct scsi_internal_data scsi;
 		struct ubi_internal_data ubi;
+		struct rkmtd_internal_data rkmtd;
 	} data;
 
 	int (*get_medium_size)(struct dfu_entity *dfu, u64 *size);
@@ -565,6 +573,18 @@ static inline int dfu_fill_entity_ubi(struct dfu_entity *dfu, char *devstr,
 				       char **argv, int argc)
 {
 	puts("UBI support not available!\n");
+	return -1;
+}
+#endif
+
+#if CONFIG_IS_ENABLED(DFU_RKMTD)
+extern int dfu_fill_entity_rkmtd(struct dfu_entity *dfu, char *devstr,
+				  char **argv, int argc);
+#else
+static inline int dfu_fill_entity_rkmtd(struct dfu_entity *dfu, char *devstr,
+					 char **argv, int argc)
+{
+	puts("RKMTD support not available!\n");
 	return -1;
 }
 #endif

@@ -104,6 +104,20 @@ config DFU_UBI
 	  UBI volume on a UBI device that has already been scanned and
 	  attached.
 
+config DFU_RKMTD
+	bool "Rockchip rkmtd back end for DFU"
+	depends on RKMTD
+	help
+	  This option enables using DFU to read and write to a Rockchip
+	  rkmtd virtual block device. The rkmtd device must already be
+	  bound and attached to its backing MTD device (e.g. via the
+	  "rkmtd bind <label>" command) before this DFU alt is used;
+	  this backend does not perform the bind/attach itself. Each
+	  DFU alt setting for rkmtd accepts a single sector offset (a
+	  multiple of 512 bytes) within the rkmtd block device; the size
+	  is always the maximum available space from that sector up to
+	  the end of the usable rkmtd area.
+
 config SET_DFU_ALT_INFO
 	bool "Dynamic set of DFU alternate information"
 	depends on !COMPILE_TEST
