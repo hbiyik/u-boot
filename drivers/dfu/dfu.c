@@ -12,6 +12,7 @@
 #include <malloc.h>
 #include <mmc.h>
 #include <fat.h>
+#include <stdio.h>
 #include <dfu.h>
 #include <hash.h>
 #include <linux/list.h>
@@ -46,9 +47,23 @@ U_BOOT_ENV_CALLBACK(dfu_alt_info, on_dfu_alt_info);
 /*
  * The purpose of the dfu_flush_callback() function is to
  * provide callback for dfu user
+ *
+ * Default implementation: record the number of bytes received for
+ * this alt-setting into the environment, as dfu_<name>_filesize,
+ * formatted in hex (no "0x" prefix, matching the convention used
+ * by ${filesize} after tftp/load-style commands). dfu->offset still
+ * holds the true total for this transfer here - dfu_transaction_cleanup()
+ * (which zeroes it) runs after this callback returns.
  */
 __weak void dfu_flush_callback(struct dfu_entity *dfu)
 {
+	char var_name[DFU_NAME_SIZE + sizeof("dfu__filesize")];
+	char var_value[17]; /* up to 16 hex digits for a u64 + NUL */
+
+	snprintf(var_name, sizeof(var_name), "dfu_%s_filesize", dfu->name);
+	snprintf(var_value, sizeof(var_value), "%llx",
+		 (unsigned long long)dfu->offset);
+	env_set(var_name, var_value);
 }
 
 /*
