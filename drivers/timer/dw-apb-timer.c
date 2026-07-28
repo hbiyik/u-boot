@@ -63,11 +63,11 @@ static int dw_apb_timer_probe(struct udevice *dev)
 #endif
 	if (CONFIG_IS_ENABLED(OF_REAL)) {
 		ret = reset_get_bulk(dev, &priv->resets);
-		if (ret)
-			dev_warn(dev, "Can't get reset: %d\n", ret);
-		else
+		if (!ret)
 			reset_deassert_bulk(&priv->resets);
-
+		else if (CONFIG_IS_ENABLED(DM_RESET))
+			dev_dbg(dev, "Can't get reset: %d\n", ret);
+			
 		ret = clk_get_by_index(dev, 0, &clk);
 		if (ret)
 			return ret;
