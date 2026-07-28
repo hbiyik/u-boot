@@ -160,7 +160,11 @@ struct dwc2_core_regs *reg;
 
 bool dfu_usb_get_reset(void)
 {
+#if CONFIG_IS_ENABLED(DFU_NO_RESET)
+	return false;
+#else
 	return !!(readl(&reg->global_regs.gintsts) & GINTSTS_USBRST);
+#endif
 }
 
 __weak void otg_phy_init(struct dwc2_udc *dev) {}
