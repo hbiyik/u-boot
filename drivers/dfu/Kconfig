@@ -96,6 +96,14 @@ config DFU_SCSI
 	  used at board level to manage specific behavior
 	  (OTP update for example).
 
+config DFU_UBI
+	bool "DFU for UBI volume support"
+	depends on DFU && MTD_UBI
+	help
+	  This enables a DFU backend that reads, writes and erases a single
+	  UBI volume on a UBI device that has already been scanned and
+	  attached.
+
 config SET_DFU_ALT_INFO
 	bool "Dynamic set of DFU alternate information"
 	depends on !COMPILE_TEST

@@ -567,6 +567,9 @@ static int dfu_fill_entity(struct dfu_entity *dfu, char *s, int alt,
 	} else if (strcmp(interface, "scsi") == 0) {
 		if (dfu_fill_entity_scsi(dfu, devstr, argv, argc))
 			return -1;
+	} else if (strcmp(interface, "ubi") == 0) {
+		if (dfu_fill_entity_ubi(dfu, devstr, argv, argc))
+			return -1;
 	} else {
 		printf("%s: Device %s not (yet) supported!\n",
 		       __func__,  interface);
@@ -663,7 +666,7 @@ int dfu_config_entities(char *env, char *interface, char *devstr)
 const char *dfu_get_dev_type(enum dfu_device_type t)
 {
 	const char *const dev_t[] = {NULL, "eMMC", "OneNAND", "NAND", "RAM",
-				     "SF", "MTD", "VIRT", "SCSI"};
+				     "SF", "MTD", "VIRT", "SCSI", "UBI"};
 	return dev_t[t];
 }
 

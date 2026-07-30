@@ -25,6 +25,7 @@ enum dfu_device_type {
 	DFU_DEV_MTD,
 	DFU_DEV_VIRT,
 	DFU_DEV_SCSI,
+	DFU_DEV_UBI,
 };
 
 enum dfu_layout {
@@ -113,6 +114,20 @@ struct scsi_internal_data {
 	unsigned int part;
 };
 
+struct ubi_internal_data {
+	int ubi_num;
+	int vol_id;
+	int vol_type;
+	char vol_name[128];
+	unsigned int usable_leb_size;
+	unsigned int min_io_size;
+	int leb_count;
+	struct ubi_volume_desc *desc;
+	u8 *wr_buf;
+	size_t wr_len;
+	size_t wr_cap;
+};
+
 #if defined(CONFIG_DFU_NAME_MAX_SIZE)
 #define DFU_NAME_SIZE			CONFIG_DFU_NAME_MAX_SIZE
 #else
@@ -141,6 +156,7 @@ struct dfu_entity {
 		struct sf_internal_data sf;
 		struct virt_internal_data virt;
 		struct scsi_internal_data scsi;
+		struct ubi_internal_data ubi;
 	} data;
 
 	int (*get_medium_size)(struct dfu_entity *dfu, u64 *size);
@@ -538,6 +554,17 @@ static inline int dfu_fill_entity_scsi(struct dfu_entity *dfu, char *devstr,
 				       char **argv, int argc)
 {
 	puts("SCSI support not available!\n");
+	return -1;
+}
+#endif
+
+#if CONFIG_IS_ENABLED(DFU_UBI)
+int dfu_fill_entity_ubi(struct dfu_entity *dfu, char *devstr, char **argv, int argc);
+#else
+static inline int dfu_fill_entity_ubi(struct dfu_entity *dfu, char *devstr,
+				       char **argv, int argc)
+{
+	puts("UBI support not available!\n");
 	return -1;
 }
 #endif

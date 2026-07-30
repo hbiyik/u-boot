@@ -12,3 +12,4 @@ obj-$(CONFIG_$(PHASE_)DFU_SF) += dfu_sf.o
 obj-$(CONFIG_$(PHASE_)DFU_WRITE_ALT) += dfu_alt.o
 obj-$(CONFIG_$(PHASE_)DFU_VIRT) += dfu_virt.o
 obj-$(CONFIG_$(PHASE_)DFU_SCSI) += dfu_scsi.o
+obj-$(CONFIG_$(PHASE_)DFU_UBI) += dfu_ubi.o
