@@ -80,7 +80,7 @@ __weak void dfu_error_callback(struct dfu_entity *dfu, const char *msg)
  */
 __weak bool dfu_usb_get_reset(void)
 {
-#ifdef CONFIG_SPL_DFU_NO_RESET
+#if CONFIG_IS_ENABLED(DFU_NO_RESET)
 	return false;
 #else
 	return true;

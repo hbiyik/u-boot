@@ -55,7 +55,7 @@ obj-$(CONFIG_$(PHASE_)BOOTSTAGE) += bootstage.o
 obj-$(CONFIG_$(PHASE_)BLOBLIST) += bloblist.o
 
 ifdef CONFIG_XPL_BUILD
-ifdef CONFIG_SPL_DFU
+ifdef CONFIG_$(PHASE_)DFU
 obj-$(CONFIG_DFU_OVER_USB) += dfu.o
 endif
 obj-$(CONFIG_SPL_NET) += miiphyutil.o

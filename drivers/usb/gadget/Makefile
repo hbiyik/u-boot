@@ -8,9 +8,9 @@ obj-$(CONFIG_$(PHASE_)USB_ETHER) += epautoconf.o config.o usbstring.o ether.o
 obj-$(CONFIG_$(PHASE_)USB_ETH_RNDIS) += rndis.o
 
 ifdef CONFIG_XPL_BUILD
-obj-$(CONFIG_SPL_USB_GADGET) += g_dnl.o
-obj-$(CONFIG_SPL_DFU) += f_dfu.o
-obj-$(CONFIG_SPL_USB_SDP_SUPPORT) += f_sdp.o
+obj-$(CONFIG_$(PHASE_)USB_GADGET) += g_dnl.o
+obj-$(CONFIG_$(PHASE_)DFU) += f_dfu.o
+obj-$(CONFIG_$(PHASE_)USB_SDP_SUPPORT) += f_sdp.o
 endif
 
 # new USB gadget layer dependencies

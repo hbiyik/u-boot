@@ -10,6 +10,9 @@ config SUPPORT_VPL
 config SPL_DFU_NO_RESET
 	bool
 
+config VPL_DFU_NO_RESET
+	bool
+
 config SPL
 	bool "Enable SPL"
 	depends on SUPPORT_SPL && !COMPILE_TEST

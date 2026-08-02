@@ -54,6 +54,10 @@ config SPL_DM_USB
 	default n if ARCH_MVEBU
 	default y
 
+config VPL_DM_USB
+	bool "Enable driver model for USB host mode in VPL"
+	depends on VPL_DM && DM_USB
+
 config DM_USB_GADGET
 	bool "Enable driver model for USB Gadget"
 	depends on DM_USB
@@ -66,6 +70,13 @@ config SPL_DM_USB_GADGET
 	depends on SPL_DM_USB
 	help
 	  Enable driver model for USB Gadget in SPL
+	  (Peripheral mode)
+
+config VPL_DM_USB_GADGET
+	bool "Enable driver model for USB Gadget in VPL"
+	depends on VPL_DM_USB
+	help
+	  Enable driver model for USB Gadget in VPL
 	  (Peripheral mode)
 
 source "drivers/usb/host/Kconfig"

@@ -194,6 +194,14 @@ config VPL_PCI
 	  necessary driver support. This enables the drivers in drivers/pci
 	  as part of a VPL build.
 
+config VPL_RAM_SUPPORT
+	bool "Support booting from RAM"
+	help
+	  Say Y here to support booting from RAM in VPL. This is used to
+	  allow an image already present in memory to be booted directly,
+	  for example after being downloaded via DFU or another means that
+	  places it directly in memory.
+
 config VPL_RELOC_LOADER
 	bool "Allow relocating the next phase"
 	help

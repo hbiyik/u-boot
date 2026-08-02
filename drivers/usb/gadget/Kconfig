@@ -44,6 +44,13 @@ config SPL_USB_GADGET
 	  Enable USB Gadget API which allows to enable USB device functions
 	  in SPL.
 
+config VPL_USB_GADGET
+	bool "USB Gadget Support in VPL"
+	depends on VPL_FRAMEWORK
+	help
+	  Enable USB Gadget API which allows to enable USB device functions
+	  in VPL.
+
 if USB_GADGET
 
 config USB_GADGET_MANUFACTURER
@@ -371,3 +378,54 @@ config SPL_SDP_USB_DEV
 	  so it can be used in compiled environment.
 
 endif # SPL_USB_GADGET
+
+if VPL_USB_GADGET
+
+config VPL_DFU
+	bool "Support DFU (Device Firmware Upgrade) in VPL"
+	select VPL_HASH
+	select VPL_DFU_NO_RESET
+	select VPL_RAM_SUPPORT
+	depends on DFU_OVER_USB
+	help
+	  This feature enables the DFU (Device Firmware Upgrade) in VPL with
+	  RAM memory device support. The Boot ROM will load and execute
+	  the VPL built with dfu. The user can load binaries (SPL/U-Boot/
+	  kernel) to the selected device partition from a host PC using
+	  dfu-utils.
+	  This feature is useful to flash the binaries to factory or
+	  bare-metal boards using the USB interface, at the earliest
+	  possible boot stage.
+
+choice
+	bool "DFU device selection in VPL"
+	depends on VPL_DFU
+
+config VPL_DFU_RAM
+	bool "RAM device"
+	depends on VPL_DFU && VPL_RAM_SUPPORT
+	help
+	  select RAM/DDR memory device for loading binary images
+	  (SPL/u-boot/kernel) to the selected device partition using
+	  DFU and execute the next stage from RAM.
+
+endchoice
+
+config VPL_USB_SDP_SUPPORT
+	bool "Support SDP (Serial Download Protocol) in VPL"
+	depends on VPL_SERIAL
+	help
+	  Enable Serial Download Protocol (SDP) device support in VPL. This
+	  allows to download images into memory and execute (jump to) them
+	  using the same protocol as implemented by the i.MX family's boot
+	  ROM.
+
+config VPL_SDP_USB_DEV
+	int "SDP USB controller index in VPL"
+	default 0
+	depends on VPL_USB_SDP_SUPPORT
+	help
+	  Some boards have USB controller other than 0. Define this option
+	  so it can be used in compiled environment.
+
+endif # VPL_USB_GADGET

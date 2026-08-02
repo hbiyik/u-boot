@@ -64,9 +64,9 @@ obj-$(CONFIG_ARCH_IMX9) += ddr/imx/imx9/
 obj-$(CONFIG_DRAM_SUN20I_D1) += ram/
 obj-$(CONFIG_SPL_DM_RESET) += reset/
 obj-$(CONFIG_SPL_MUSB_NEW) += usb/musb-new/
-obj-$(CONFIG_SPL_USB_GADGET) += usb/gadget/
-obj-$(CONFIG_SPL_USB_GADGET) += usb/common/
-obj-$(CONFIG_SPL_USB_GADGET) += usb/gadget/udc/
+obj-$(CONFIG_$(PHASE_)USB_GADGET) += usb/gadget/
+obj-$(CONFIG_$(PHASE_)USB_GADGET) += usb/common/
+obj-$(CONFIG_$(PHASE_)USB_GADGET) += usb/gadget/udc/
 obj-$(CONFIG_SPL_WATCHDOG) += watchdog/
 obj-$(CONFIG_SPL_USB_HOST) += usb/host/
 obj-$(CONFIG_SPL_SATA) += ata/ scsi/
@@ -75,6 +75,14 @@ obj-$(CONFIG_SPL_THERMAL) += thermal/
 
 endif
 endif
+endif
+
+ifdef CONFIG_VPL_BUILD
+
+obj-$(CONFIG_VPL_USB_GADGET) += usb/gadget/
+obj-$(CONFIG_VPL_USB_GADGET) += usb/common/
+obj-$(CONFIG_VPL_USB_GADGET) += usb/gadget/udc/
+
 endif
 
 ifdef CONFIG_TPL_BUILD
