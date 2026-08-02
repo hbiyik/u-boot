@@ -10,6 +10,67 @@
 #include <onenand_uboot.h>
 #include <ubispl.h>
 #include <spl.h>
+#include <mtd.h>
+
+#if IS_ENABLED(CONFIG_SPL_UBI_MTD)
+__weak int nand_spl_read_block(int block, int offset, int len, void *dst)
+{
+    static struct mtd_info *mtd = NULL;
+    static loff_t *block_map = NULL;
+    static int max_blocks = 0;
+
+    size_t retlen;
+
+    if (!mtd) {
+        struct mtd_info *nand = NULL;
+        for (int i = 0; i < CONFIG_SYS_MAX_NAND_DEVICE; i++) {
+            nand = get_nand_dev_by_index(i);
+            if (IS_ERR_OR_NULL(nand))
+                continue;
+
+            if (list_empty(&nand->partitions))
+                add_mtd_partitions_of(nand);
+        }
+
+        mtd = get_mtd_device_nm(CONFIG_SPL_UBI_MTD_NAME);
+        if (IS_ERR_OR_NULL(mtd)) {
+            mtd = NULL;
+            return -ENODEV;
+        }
+
+        loff_t addr = 0;
+        int total_ph_blocks = mtd->size / mtd->erasesize;
+        int logical_index = 0;
+
+        block_map = malloc(total_ph_blocks * sizeof(loff_t));
+        if (!block_map) {
+            printf("Error: Failed to allocate memory for block map\n");
+            return -ENOMEM;
+        }
+
+        printf("Scanning MTD device and building block map...\n");
+        for (int i = 0; i < total_ph_blocks; i++) {
+            if (!mtd_block_isbad(mtd, addr)) {
+                block_map[logical_index++] = addr;
+            }
+            addr += mtd->erasesize;
+        }
+        max_blocks = logical_index;
+        printf("Scan complete: Found %d good blocks out of %d physical blocks.\n", max_blocks, total_ph_blocks);
+    }
+
+    if (block < 0 || block >= max_blocks) {
+        return -EINVAL;
+    }
+
+    loff_t addr = block_map[block];
+    
+    if (mtd_block_isbad(mtd, addr))
+        return -EIO;
+
+    return mtd_read(mtd, addr + offset, len, &retlen, dst);
+}
+#endif
 
 #if IS_ENABLED(CONFIG_SPL_OS_BOOT)
 int spl_ubi_load_image_os(struct spl_image_info *spl_image,
