@@ -135,6 +135,11 @@ void board_boot_order(u32 *spl_boot_list)
 				continue;
 		}
 
+		if (strcmp(conf, "dfu-xpl") == 0) {
+			spl_boot_list[idx++] = BOOT_DEVICE_DFU;
+			continue;
+		}
+
 		/* First check if the list element is an alias */
 		alias = fdt_get_alias(blob, conf);
 		if (alias)
