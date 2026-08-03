@@ -1,6 +1,24 @@
 menu "VPL options"
 	depends on VPL
 
+config VPL_LEGACY_IMAGE_FORMAT
+	bool "Support VPL loading and booting of Legacy images"
+	default y if !VPL_LOAD_FIT
+	depends on !TI_SECURE_DEVICE
+	help
+	  VPL will support loading and booting Legacy images when this option
+	  is y. If this is not set, VPL will move on to other available
+	  boot media to find a suitable image.
+
+config VPL_RAW_IMAGE_SUPPORT
+	bool "Support VPL loading and booting of RAW images"
+	default n
+	depends on !TI_SECURE_DEVICE
+	help
+	  VPL will support loading and booting a RAW image when this option
+	  is y. If this is not set, VPL will move on to other available
+	  boot media to find a suitable image.
+
 config VPL_BANNER_PRINT
 	bool "Enable output of the VPL banner 'U-Boot VPL ...'"
 	default y
