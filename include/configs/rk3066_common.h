@@ -21,6 +21,7 @@
 	"kernel_addr_r=0x62000000\0" \
 	"ramdisk_addr_r=0x64000000\0"
 
+#ifndef CONFIG_XPL_BUILD
 #define CFG_EXTRA_ENV_SETTINGS \
 	"fdt_high=0x6fffffff\0" \
 	"initrd_high=0x6fffffff\0" \
@@ -28,5 +29,12 @@
 	ENV_MEM_LAYOUT_SETTINGS \
 	ROCKCHIP_DEVICE_SETTINGS \
 	"boot_targets=" BOOT_TARGETS "\0"
+#else
+#define CFG_EXTRA_ENV_SETTINGS \
+	"fdt_high=0x6fffffff\0" \
+	"initrd_high=0x6fffffff\0" \
+	ENV_MEM_LAYOUT_SETTINGS \
+	ROCKCHIP_DEVICE_SETTINGS
+#endif
 
 #endif

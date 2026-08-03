@@ -167,7 +167,7 @@
 		filename = "u-boot-rockchip.bin";
 		pad-byte = <0xff>;
 
-		mkimage {
+		mkimage@0 {
 			filename = "idbloader.img";
 			args = "-n", CONFIG_SYS_SOC, "-T", "rksd";
 			multiple-data-files;
@@ -183,6 +183,23 @@
 			};
 		};
 
+#if defined(CONFIG_VPL)
+		mkimage@1 {
+			filename = "idbloader-vpl.img";
+			args = "-n", CONFIG_SYS_SOC, "-T", "rksd";
+			multiple-data-files;
+
+#ifdef CONFIG_ROCKCHIP_EXTERNAL_TPL
+			rockchip-tpl {
+			};
+#elif defined(CONFIG_TPL)
+			u-boot-tpl {
+			};
+#endif
+			u-boot-vpl {
+			};
+		};
+#endif
 #ifdef HAS_FIT
 		fit {
 			filename = "u-boot.itb";
@@ -199,7 +216,7 @@
 		filename = "u-boot-rockchip-spi.bin";
 		pad-byte = <0xff>;
 
-		mkimage {
+		mkimage@0 {
 			filename = "idbloader-spi.img";
 			args = "-n", CONFIG_SYS_SOC, "-T", "rkspi";
 			multiple-data-files;
@@ -214,6 +231,24 @@
 			u-boot-spl {
 			};
 		};
+
+#if defined(CONFIG_VPL)
+		mkimage@1 {
+			filename = "idbloader-vpl.img";
+			args = "-n", CONFIG_SYS_SOC, "-T", "rkspi";
+			multiple-data-files;
+
+#ifdef CONFIG_ROCKCHIP_EXTERNAL_TPL
+			rockchip-tpl {
+			};
+#elif defined(CONFIG_TPL)
+			u-boot-tpl {
+			};
+#endif
+			u-boot-vpl {
+			};
+		};
+#endif
 
 #ifdef HAS_FIT
 		fit {

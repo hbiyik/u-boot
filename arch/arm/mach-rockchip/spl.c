@@ -114,7 +114,7 @@ void board_init_f(ulong dummy)
 	/* Init ARM arch timer in arch/arm/cpu/armv7/arch_timer.c */
 	timer_init();
 #endif
-#if !defined(CONFIG_TPL) || defined(CONFIG_SPL_RAM)
+#if !defined(CONFIG_TPL) || defined(CONFIG_SPL_RAM) || defined(CONFIG_VPL_BUILD)
 	debug("\nspl:init dram\n");
 	ret = dram_init();
 	if (ret) {
