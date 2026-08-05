@@ -791,9 +791,9 @@ static inline void rk_nfc_hw_init(struct rk_nfc *nfc)
 {
 	/* Disable flash wp. */
 	writel(FMCTL_WP, nfc->regs + NFC_FMCTL);
-	/* Config default timing 40ns at 150 Mhz NFC clock. */
-	writel(0x1081, nfc->regs + NFC_FMWAIT);
-	nfc->cur_timing = 0x1081;
+	/* Config default timing 27ns at 150 Mhz NFC clock. */
+	nfc->cur_timing = ACCTIMING(1, 4, 1);;
+	writel(nfc->cur_timing, nfc->regs + NFC_FMWAIT);
 	/* Disable randomizer and DMA. */
 	writel(0, nfc->regs + nfc->cfg->randmz_off);
 	writel(0, nfc->regs + nfc->cfg->dma_cfg_off);
@@ -920,7 +920,9 @@ static int rk_nfc_nand_chip_init(ofnode node, struct rk_nfc *nfc, int devnum)
 		return -ENOMEM;
 
 	rknand->nsels = nsels;
-	rknand->timing = nfc->cur_timing;
+	ret = ofnode_read_u32(node, "nand-rwpw", &tmp);
+	ret = ret ? 4 : tmp;
+	rknand->timing = ACCTIMING(1, ret, 1);
 
 	ret = ofnode_read_u32_array(node, "reg", cs, nsels);
 	if (ret < 0) {
